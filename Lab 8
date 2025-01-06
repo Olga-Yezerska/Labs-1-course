@@ -1,0 +1,422 @@
+//Розробити програму, команди меню якої передбачають такі дії:
+//1. Згенерувати дві розріджені матриці довільної вимірності, кількість нульових елементів яких більше за 60%. 
+//Збереження кожної матриці в оперативній пам'яті здійснити в рядковому форматі CRS у вигляді трьох одновимірних масивів: 
+//AN зберігає значення ненульових елементів в кількості NNZ , JA зберігає номери стовпців з ненульовими елементами матриці в кількості NNZ, IA має по одному елементу на рядок матриці і кодує індекс ненульового елемента в AN , з якого починається даний рядок. 
+//2. Вивести матриці на екран.
+//3. Вивести на екран одновимірні масиви, що зберігають розріджені матриці.
+//4. Визначити добуток двох матриць за алгоритмом розріджених матриць.
+//5. Визначити добуток двох матриць, застосовуючи стандартний алгоритм роботи з матрицями.
+//6. Порівняти час виконання операцій і обсяг пам'яті при використанні цих двох алгоритмів.
+#include <iostream> //для введення та виведення інформації.
+#include <ctime> //для роботи з часом
+#include <cstdlib> //для генерації випадкових чисел(rand() і srand())
+using namespace std;
+const int firstRow = 5; //розмір матриці
+const int firstColumn = 5; //розмір матриці
+const int secondRow = 5; //розмір матриці
+const int secondColumn = 5; //розмір матриці
+// ========== ідентифікація автора та умови ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab8 var4" << endl;
+	cout << "Develop a program whith following commands in the menu." << endl;
+	cout << "Save each matrix in RAM in CRS string format in three one - dimensional arrays :" << endl;
+	cout << "AN stores the values of non - zero elements in each NNZ" << endl;
+	cout << "JA stores column numbers with non - zero elements of the matrix in the number of NNZ" << endl;
+	cout << "IA has one element per row of the matrix and encodes the index of the non - zero element in AN, from which this row begins." << endl;
+	cout << endl;
+}
+// ========== структура для зберігання розрідженої матриці у форматі CRS ==========
+struct SparseMatrix
+{
+	int* AN; // масив ненульових значень
+	int* JA; // масив індексів стовпців ненульових елементів
+	int* IA; // масив індексів початку рядків у AN
+	int rows, columns, nnz; // кількість рядків, стовпців та ненульових елементів
+};
+// ========== генерація розрідженої матриці ==========
+void generateSparseMatrix(int rows, int columns, int*& AN, int*& JA, int*& IA, int& nnz, int offset) 
+{
+	int maxNNZ = rows * columns * 0.4; // максимальна кількість ненульових елементів
+	AN = new int[maxNNZ]; // виділення пам'яті для ненульових значень
+	JA = new int[maxNNZ]; // виділення пам'яті для індексів стовпців ненульових елементів
+	IA = new int[rows + 1]; // виділення пам'яті для індексів кожного рядка
+	nnz = 0; //ненульові елементи
+	srand(static_cast<unsigned int>(time(0)) + offset); // генератор випадкових чисел
+	int index = 0; // індекс для масивів AN і JA
+	for (int i = 0; i < rows; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+	{
+		IA[i] = index; //початок ненульових значень для поточного рядка
+		for (int j = 0; j < columns; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців і збільшується
+		{
+			if (nnz < maxNNZ && rand() % 100 < 40) //якщо nnz менше maxNNZ і випадкове число менше 40
+			{
+				AN[index] = rand() % 20 + 1; // випадкове ненульове значення від 1 до 20
+				JA[index] = j; //номер стовпця
+				index++; //збільшення індекса
+				nnz++; //зюільшення ненульових елементів
+			}
+		}
+	}
+	IA[rows] = nnz; //завершальний елемент для IA
+}
+// ========== виведення розрідженої матриці ==========
+void displaySparseMatrix(int rows, int columns, int* AN, int* JA, int* IA) 
+{
+	for (int i = 0; i < rows; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+	{
+		for (int j = 0; j < columns; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців і збільшується
+		{
+			bool found = false; //булева змінна зі значенням брехні для відстеження наявності ненульових значень
+			for (int k = IA[i]; k < IA[i + 1]; ++k) //доки коефіцієнт є індексом першого ненульового елемента в рядку i, менший за індекс першого ненульового елемента в наступному рядку і збільшується
+			{
+				if (JA[k] == j) //якщо індекс стовпця дорівнює поточному стовпцю j
+				{
+					cout << AN[k] << " "; //виведення ненульового значення
+					found = true; //зміна булевої змінної
+					break; //вихід з циклу
+				}
+			}
+			if (!found) //якщо ненульовий елемент не знайдено
+			{
+				cout << "0 "; //виведення нуля
+			}
+		}
+		cout << endl; //новий рядок
+	}
+}
+// ========== виведення одновимірних масивів ==========
+void displayCRSArrays(int* AN, int* JA, int* IA, int rows, int nnz) 
+{
+	cout << "AN: "; //виведення повідомлення
+	for (int i = 0; i < nnz; ++i) //доки коефіцієнт є нулем, менший за кількість ненульових значень і збільшується
+	{
+		cout << AN[i] << " "; //виведення значень
+	}
+	cout << endl; //новий рядок
+	cout << "JA: "; //виведення повідомлення
+	for (int i = 0; i < nnz; ++i) //доки коефіцієнт є нулем, менший за кількість ненульових значень і збільшується
+	{
+		cout << JA[i] << " "; //виведення значень
+	}
+	cout << endl; //новий рядок
+	cout << "IA: "; //виведення повідомлення
+	for (int i = 0; i <= rows; ++i) //доки коефіцієнт є нулем, менший/дорівнює кількісті рядків і збільшується
+	{
+		cout << IA[i] << " "; //виведення значень
+	}
+	cout << endl; //новий рядок
+}
+// ========== множення матриць за алгоритмом розріджених матриць ==========
+void multiplySparseMatrices(int* AN_A, int* JA_A, int* IA_A, int nnzA, int rowsA, int columnsA, int* AN_B, int* JA_B, int* IA_B, int nnzB, int rowsB, int columnsB, int*& AN_C, int*& JA_C, int*& IA_C, int& nnzC)
+{
+	int maxNNZ = rowsA * columnsB; //максимально можливі ненульові елементи в результаті
+	AN_C = new int[maxNNZ]; //виділення пам'яті для множення ненульових значень
+	JA_C = new int[maxNNZ]; //виділення пам'яті для множення індексів стовпців ненульових елементів
+	IA_C = new int[rowsA + 1]; //виділення пам'яті для множення індексів кожного рядка
+	nnzC = 0; //кількість ненульових елементів у результаті
+	for (int i = 0; i < rowsA; ++i) //доки коефіцієнт є нулем, менший за кількість рядків першої матриці і збільшується
+	{
+		IA_C[i] = nnzC; //початковий індекс для цього рядка в результаті
+		for (int j = 0; j < columnsB; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців другої матриці і збільшується
+		{ 
+			int sum = 0; //сума ненульових елементів
+			for (int k = IA_A[i]; k < IA_A[i + 1]; ++k) //доки коефіцієнт є індексом першого ненульового елемента першої матриці в рядку i, менший за індекс першого ненульового елемента в першій матриці в наступному рядку і збільшується
+			{ 
+				int col_A = JA_A[k]; //номер стовпця ненульового елемента
+				for (int l = IA_B[col_A]; l < IA_B[col_A + 1]; ++l) //відповідний стовпець у другій матриці
+				{
+					if (JA_B[l] == j) //якщо стовпець відповідає поточному стовпцю результату
+					{
+						sum += AN_A[k] * AN_B[l]; //обчислення суми добутку
+					}
+				}
+			}
+			if (sum != 0) //якщо сума ненульова
+			{ 
+				AN_C[nnzC] = sum; //збереження ненульового значення
+				JA_C[nnzC] = j; //збереженняу номер стовпця
+				nnzC++; //збільшення лічильника ненульових елементів
+			}
+		}
+	}
+	IA_C[rowsA] = nnzC; //збереження кінець останнього рядка в результаті
+}
+// ========== вимірювання часу, необхідного для множення двох розріджених матриць ==========
+void timedSparseMultiplication(int* AN_A, int* JA_A, int* IA_A, int nnzA, int rowsA, int columnsA, int* AN_B, int* JA_B, int* IA_B, int nnzB, int rowsB, int columnsB) 
+{
+	int* AN_C = nullptr, * JA_C = nullptr, * IA_C = nullptr; //оголошення вказівників для масивів, які будуть містити результати множення
+	int nnzC; //зберігання кількості ненульових елементів у результаті
+	clock_t start = clock(); //функція clock() для вимірювання часу; start для визначення часу
+	multiplySparseMatrices(AN_A, JA_A, IA_A, nnzA, rowsA, columnsA, AN_B, JA_B, IA_B, nnzB, rowsB, columnsB, AN_C, JA_C, IA_C, nnzC); //виклик функції multiplySparseMatrices
+	clock_t end = clock(); //функція clock() для вимірювання часу; end для обчислення часу
+	double timeSparse = double(end - start) / CLOCKS_PER_SEC; //обчислення часу виконання у секундах;ділення на константу CLOCKS_PER_SEC, яка вказує на кількість тактів процесора за секунду
+	cout << "Sparse multiplication time: " << timeSparse << " seconds" << endl; //виведення повідомлення і результатів
+}
+// ========== звільнення пам'яті ==========
+void cleanup(int* &AN, int* &JA, int* &IA) 
+{
+	delete[] AN; //звільнення пам'яті, виділеної для масива
+	delete[] JA; //звільнення пам'яті, виділеної для масива
+	delete[] IA; //звільнення пам'яті, виділеної для масива
+}
+// ========== перетворення розрідженої матриці формату CRS на звичайну двовимірну ==========
+void convertCRSToMatrix(int* AN, int* JA, int* IA, int rows, int columns, int** matrix) 
+{
+	for (int i = 0; i < rows; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+	{
+		for (int j = 0; j < columns; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців і збільшується
+		{
+			matrix[i][j] = 0; //ініціалізація елементів нулями
+			for (int k = IA[i]; k < IA[i + 1]; ++k) //доки коефіцієнт є індексом першого ненульового елемента в рядку i, менший за індекс першого ненульового елемента в наступному рядку і збільшується
+			{
+				if (JA[k] == j) //якщо індекс стовпця JA[k] відповідає значенню j
+				{
+					matrix[i][j] = AN[k]; //присвоєння ненульове значення
+					break; //вихід з циклу
+				}
+			}
+		}
+	}
+}
+// ========== множення двох звичайних матриць ==========
+void multiplyStandardMatrices(int** matrixA, int rowsA, int columnsA, int** matrixB, int rowsB, int columnsB, int**& matrixC) 
+{
+	matrixC = new int* [rowsA]; //виділення пам'яті для рядків першої матриці
+	for (int i = 0; i < rowsA; ++i) //доки коефіцієнт є нулем, менший за кількість рядків першої матриці і збільшується
+	{
+		matrixC[i] = new int[columnsB]; //виділення пам'яті для стовпців другої  матриці
+		for (int j = 0; j < columnsB; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців другої матриці і збільшується
+		{
+			matrixC[i][j] = 0; //ініціалізація елементів нулями
+			for (int k = 0; k < columnsA; ++k) //доки коефіцієнт є нулем, менший за кількість стовпців першої матриці і збільшується
+			{
+				matrixC[i][j] += matrixA[i][k] * matrixB[k][j]; //обчислення суми добутку
+			}
+		}
+	}
+}
+// ========== звільнення пам'яті ==========
+void cleanupStandardMatrix(int** matrix, int rows) 
+{
+	for (int i = 0; i < rows; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+	{
+		delete[] matrix[i]; //звільнення пам'яті, виділеної для масива
+	}
+	delete[] matrix; //звільнення пам'яті, виділеної для масива
+}
+// ========== вимірювання часу, необхідного для множення двох матриць ==========
+void timedStandardMultiplication(int* AN_A, int* JA_A, int* IA_A, int rowsA, int columnsA, int* AN_B, int* JA_B, int* IA_B, int rowsB, int columnsB)
+{
+	int** matrixA = new int* [rowsA]; //виділення пам'ять для звичайної двовимірної матриці matrixA
+	for (int i = 0; i < rowsA; ++i) //доки коефіцієнт є нулем, менший за кількість рядків першої матриці і збільшується
+	{
+		matrixA[i] = new int[columnsA]; //виділення пам'ять для звичайної двовимірної матриці matrixA
+	}
+	int** matrixB = new int* [rowsB]; //виділення пам'ять для звичайної двовимірної матриці matrixВ
+	for (int i = 0; i < rowsB; ++i) //доки коефіцієнт є нулем, менший за кількість рядків другої матриці і збільшується
+	{
+		matrixB[i] = new int[columnsB]; //виділення пам'ять для звичайної двовимірної матриці matrixВ
+	}
+	convertCRSToMatrix(AN_A, JA_A, IA_A, rowsA, columnsA, matrixA); //виклик функції convertCRSToMatrix
+	convertCRSToMatrix(AN_B, JA_B, IA_B, rowsB, columnsB, matrixB); //виклик функції convertCRSToMatrix
+	int** matrixC; //вказівник на вказівник двовимірної матриці
+	clock_t start = clock(); //функція clock() для вимірювання часу; start для визначення часу
+	multiplyStandardMatrices(matrixA, rowsA, columnsA, matrixB, rowsB, columnsB, matrixC); //виклик функції multiplyStandardMatrices
+	clock_t end = clock(); //функція clock() для вимірювання часу; end для обчислення часу
+	double timeStandard = double(end - start) / CLOCKS_PER_SEC; //обчислення часу виконання у секундах;ділення на константу CLOCKS_PER_SEC, яка вказує на кількість тактів процесора за секунду
+	cout << "Standard multiplication time: " << timeStandard << " seconds" << endl; //виведення повідомлення і результату
+}
+// ========== порівняння продуктивності двох методів множення матриць ===========
+void compareSparseAndStandardMultiplication(int* AN_A, int* JA_A, int* IA_A, int nnzA, int rowsA, int columnsA, int* AN_B, int* JA_B, int* IA_B, int nnzB, int rowsB, int columnsB) 
+{
+	cout << "Comparing sparse and standard multiplication performance:" << endl; //виведення повідомлення
+	timedSparseMultiplication(AN_A, JA_A, IA_A, nnzA, rowsA, columnsA, AN_B, JA_B, IA_B, nnzB, rowsB, columnsB); //виклик функції timedSparseMultiplication
+	timedStandardMultiplication(AN_A, JA_A, IA_A, rowsA, columnsA, AN_B, JA_B, IA_B, rowsB, columnsB); //виклик функції timedStandardMultiplication
+}
+// ========== перевірка введення ==========
+void check(int* value) 
+{
+	bool isValid = false; //булева змінна зі значенням брехні
+	while (!isValid) //доки цикл справджується
+	{
+		cin >> *value; //внесення значення
+		if (cin && cin.peek() == '\n') //якщо воно коректне
+		{
+			isValid = true; //зміна на правду
+		}
+		else //інакше
+		{
+			cout << "Invalid input. Try again: "; //виведення повідомлення
+			cin.clear(); //очищення потоку
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+	}
+}
+// ========== порівняння витраченої пам'яті ==========
+void compareMemoryUsage(int rowsA, int columnsA, int nnzA, int rowsB, int columnsB, int nnzB)
+{
+	int sparseMemory = (nnzA + nnzB) * (sizeof(int) * 2) + (rowsA + rowsB + 2) * sizeof(int); //обсяг пам'яті для розрідженого представлення
+	int standardMemory = (rowsA * columnsA + rowsB * columnsB) * sizeof(int); //обсяг пам'яті для звичайного представлення
+	cout << "Memory used by sparse representation: " << sparseMemory << " bytes" << endl; //виведення повідомлення та результату
+	cout << "Memory used by standard representation: " << standardMemory << " bytes" << endl; //виведення та результату результату
+}
+// ========== покажчики на функції ==========
+using FunctionPtr1 = void(*)(int, int, int*&, int*&, int*&, int&, int); 
+using FunctionPtr2 = void(*)(int, int, int*, int*, int*); 
+using FunctionPtr3 = void(*)(int*, int*, int*, int, int); 
+using FunctionPtr4 = void(*)(int*, int*, int*, int, int, int, int*, int*, int*, int, int, int, int*&, int*&, int*&, int&); 
+using FunctionPtr5 = void(*)(int*, int*, int*, int, int, int**); 
+using FunctionPtr6 = void(*)(int**, int, int, int**, int, int, int**&); 
+using FunctionPtr7 = void(*)(int*, int*, int*, int, int, int, int*, int*, int*, int, int, int); 
+using FunctionPtr8 = void(*)(int**, int);
+using FunctionPtr9 = void(*)(int, int, int, int, int, int);
+using FunctionPtr10 = void(*)(int*&, int*&, int*&);
+// ========== меню та вибір користувача ==========
+void choice(int* userChoice, FunctionPtr1 functions1[], FunctionPtr2 functions2[], FunctionPtr3 functions3[], FunctionPtr4 functions4[], FunctionPtr5 functions5[], FunctionPtr6 functions6[], FunctionPtr7 functions7[], FunctionPtr8 functions8[],FunctionPtr9 functions9[], FunctionPtr10 functions10[])
+{
+	//вивід меню
+		cout << "=============================================== Menu ===============================================" << endl;
+		cout << "1. Generate two sparse matrices of free dimension, the number of zero elements of which exceeds 60 %" << endl;
+		cout << "2. Display matrices on the screen." << endl;
+		cout << "3. Display one-dimensional arrays that store sparse matrices." << endl;
+		cout << "4. Determine the product of two matrices using the sparse matrix algorithm." << endl;
+		cout << "5. Determine the product of two matrices using a standard algorithm for working with matrices." << endl;
+		cout << "6. Compare the execution time of operations and the amount of memory when using these two algorithms." << endl;
+		cout << "7. Exit" << endl;
+		cout << "=======================================================================================================" << endl;
+		int* AN_A = nullptr, * JA_A = nullptr, * IA_A = nullptr; //зберігання розріджених матриць
+		int nnzA; //ненульові елементи
+		int* AN_B = nullptr, * JA_B = nullptr, * IA_B = nullptr; //зберігання розріджених матриць
+		int nnzB; //ненульові елементи
+		int* AN_C = nullptr, * JA_C = nullptr, * IA_C = nullptr; //зберігання розріджених матриць
+		int nnzC; //ненульові елементи
+		bool isMatrixGenerated = false; //булева змінна зі значенням брехні для перевірки згенерованості матриць
+		bool isDetermineFirst = false; // булева змінна зі значенням брехні для перевірки наявності добутку матриць
+		bool isDetermineSecond = false; // булева змінна зі значенням брехні для перевірки наявності добутку матриць
+		do //виконувати дії
+		{ 
+		cout << "Chose the action:" << endl; //виведення повідомлення
+		check(userChoice); //перевірка введення
+		switch (*userChoice) //вибір варіанту і дії
+		{
+		case 1: //якщо варіант 1
+			functions1[0](firstRow, firstColumn, AN_A, JA_A, IA_A, nnzA, 1); //виклик функції generateSparseMatrix
+			functions1[0](secondRow, secondColumn, AN_B, JA_B, IA_B, nnzB, 2); //виклик функції generateSparseMatrix
+			isMatrixGenerated = true; //зміна булевої змінної на правду
+			break; //вихід
+		case 2: //якщо варіант 2
+			if (isMatrixGenerated) //якщо булева змінна правда
+			{
+				cout << "First matrix: " << endl; //виведення повідомлення
+				functions2[0](firstRow, firstColumn, AN_A, JA_A, IA_A); //виклик функції displaySparseMatrix
+				cout << "Second matrix: " << endl; //виведення повідомлення
+				functions2[0](secondRow, secondColumn, AN_B, JA_B, IA_B); //виклик функції displaySparseMatrix
+			}
+			else //інакше
+			{
+				cout << "The matrices have not yet been generated." << endl; //виведення повідомлення
+			}
+			break; //вихід
+		case 3: //якщо варіант 3
+			if (isMatrixGenerated) //якщо булева змінна правда
+			{
+				cout << "One-dimensional arrays for first matrix:" << endl; //виведення повідомлення
+				functions3[0](AN_A, JA_A, IA_A, firstRow, nnzA); //виклик функції displayCRSArrays
+				cout << "One-dimensional arrays for second matrix:" << endl; //виведення повідомлення
+				functions3[0](AN_B, JA_B, IA_B, secondRow, nnzB); //виклик функції displayCRSArrays
+			}
+			else //інакше
+			{
+				cout << "The matrices have not yet been generated." << endl; //виведення повідомлення
+			}
+			break; //вихід
+		case 4: //якщо варіант 4
+			if (isMatrixGenerated) //якщо булева змінна правда
+			{
+				int* AN_C = nullptr, * JA_C = nullptr, * IA_C = nullptr; //змінні для результатуючої матриці
+				int nnzC; //кількість ненульових елементів у результаті
+				functions4[0](AN_A, JA_A, IA_A, nnzA, firstRow, firstColumn, AN_B, JA_B, IA_B, nnzB, secondRow, secondColumn, AN_C, JA_C, IA_C, nnzC); //виклик функції multiplySparseMatrices
+				cout << "Resulting matrix (product): " << endl; //виведення повідомлення
+				functions2[0](firstRow, secondColumn, AN_C, JA_C, IA_C); //виклик функції displaySparseMatrix
+				isDetermineFirst = true; //зміна булевої змінної на правду
+			}
+			else //інакше
+			{
+				cout << "The matrices have not yet been generated." << endl; //виведення повідомлення
+			}
+			break;//вихід
+		case 5://якщо варіант 5
+			if (isMatrixGenerated) //якщо булева змінна правда
+			{
+				int** matrixA = new int* [firstRow]; //перетворення розріджених матриць в стандартні
+				int** matrixB = new int* [secondRow]; //перетворення розріджених матриць в стандартні
+				for (int i = 0; i < firstRow; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+				{
+					matrixA[i] = new int[firstColumn]; //створення масиву
+				}
+				for (int i = 0; i < secondRow; ++i)  //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+				{
+					matrixB[i] = new int[secondColumn]; //створення масиву
+				}
+				functions5[0](AN_A, JA_A, IA_A, firstRow, firstColumn, matrixA); //виклик функції convertCRSToMatrix
+				functions5[0](AN_B, JA_B, IA_B, secondRow, secondColumn, matrixB); //виклик функції convertCRSToMatrix
+				int** matrixC; //вказівник на вказівник двовимірної матриці
+				functions6[0](matrixA, firstRow, firstColumn, matrixB, secondRow, secondColumn, matrixC); //виклик функції multiplyStandardMatrices
+				cout << "Resulting matrix (product):" << endl; //виведення повідомлення
+				for (int i = 0; i < firstRow; ++i) //доки коефіцієнт є нулем, менший за кількість рядків і збільшується
+				{
+					for (int j = 0; j < secondColumn; ++j) //доки коефіцієнт є нулем, менший за кількість стовпців і збільшується
+					{
+						cout << matrixC[i][j] << " "; //виведення масиву
+					}
+					cout << endl; //новий рядок
+				}
+				isDetermineSecond = true; //зміна булевої змінної на правду
+				functions8[0](matrixA, firstRow); //звільнення пам'яті
+				functions8[0](matrixB, firstRow); //звільнення пам'яті
+				functions8[0](matrixC, firstRow); //звільнення пам'яті
+			}
+			else //інакше
+			{
+				cout << "The matrices have not yet been generated." << endl; //виведення повідомлення
+			}
+			break; //вихід
+		case 6: //якщо варіант 6
+			if (isMatrixGenerated && isDetermineFirst && isDetermineSecond) //якщо булеві змінні правда
+			{
+				functions7[0](AN_A, JA_A, IA_A, nnzA, firstRow, firstColumn, AN_B, JA_B, IA_B, nnzB, secondRow, secondColumn); //виклик функції compareSparseAndStandardMultiplication
+				functions9[0](firstRow, firstColumn, nnzA, secondRow, secondColumn, nnzB); //виклик функції compareMemoryUsage
+			}
+			else //інакше
+			{
+				cout << "The matrices have not yet been generated or determined." << endl; //виведення повідомлення
+			}
+			break; //вихід
+		case 7: //якщо варіант 7
+			cout << "Exiting the program. Goodbye!" << endl; //виведення повідомлення
+			return;  // Завершення виконання функції choice, а також програми
+		default: //якщо інші варіанти
+			cout << "Invalid choice! Please try again." << endl; //виведення повідомлення
+		}
+		} while (*userChoice != 7); //доки введення не 7
+		functions10[0](AN_A, JA_A, IA_A); //звільнення пам'яті
+}
+// ========== основна функція ==========
+int main()
+{
+	identification(); //виклик ідентифікації 
+	int userChoice; //змінна вибору користувача
+	FunctionPtr1 functions1[] = {generateSparseMatrix}; //покажчик на функцію
+	FunctionPtr2 functions2[] = {displaySparseMatrix }; //покажчик на функцію
+	FunctionPtr3 functions3[] = { displayCRSArrays }; //покажчик на функцію
+	FunctionPtr4 functions4[] = { multiplySparseMatrices }; //покажчик на функцію
+	FunctionPtr5 functions5[] = { convertCRSToMatrix }; //покажчик на функцію
+	FunctionPtr6 functions6[] = { multiplyStandardMatrices }; //покажчик на функцію
+	FunctionPtr7 functions7[] = { compareSparseAndStandardMultiplication }; //покажчик на функцію
+	FunctionPtr8 functions8[] = { cleanupStandardMatrix }; //покажчик на функцію
+	FunctionPtr9 functions9[] = { compareMemoryUsage }; //покажчик на функцію
+	FunctionPtr10 functions10[] = { cleanup }; //покажчик на функцію
+	choice(&userChoice, functions1, functions2, functions3, functions4, functions5, functions6, functions7, functions8, functions9, functions10); //виклик вибору користувача
+	return 0; //повернення нуля
+} //кінець

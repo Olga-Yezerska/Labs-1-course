@@ -1,0 +1,312 @@
+   Завдання 1
+//У лівому верхньому кутку дошки розміром n * m розташований шаховий король
+//За один хід він може зробити хід вправо, вниз або на одну клітину по діагоналі вправо-вниз
+//Порахувати кількість маршрутів, що веде з лівого верхнього кута шахової дошки в правий нижній кут
+#include <iostream> //підключення бібліотеки вводу-виведення
+using namespace std;
+const int MAX_SIZE = 50; //константа для обчислень
+int n, m; //розмір матриця
+// ========== ідентифікація автора та умови ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab7 var4" << endl;
+	cout << "The chess king is located in the upper left corner of the n * m board." << endl;
+	cout << "In one move, he can make a move to the right, down, or one square diagonally right-down." << endl;
+	cout << "Count the number of routes leading from the top left corner of the chessboard to the bottom right corner." << endl;
+	cout << "Enter the dimensions of the board(numbers n, m) from the keyboard." << endl;
+	cout << "Display on the screen the number of searched routes, the matrix in which the elements that are the route of the chess king are marked with the value 1, the matrix elements that are not part of the searched routes are marked with the value 0." << endl;
+}
+// ========== перевірка введення ==========
+int check(int mValue, int nValue)
+{
+	int value; //ініціалізація змінної
+	bool isValid = false; //булева змінна зі значенням правди
+	while (!isValid) //доки цикл справджується
+	{
+		cin >> value; //внесення введення
+		if (!cin || value < mValue || value > nValue || cin.peek() != '\n')  //якщо введення не є числом, менше за мінамальне або більше за максимальне значення, є дробовим
+		{
+			cout << "Invalid input. Try again: "; //виведення повідомлення
+			cin.clear(); //очищення потоку
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //інакше
+		{
+			isValid = true; //зміна значення на правду
+		}
+	}
+	return value; //повернення значення
+}
+// ========== введення ==========
+void input()
+{
+	cout << "==========================================" << endl;
+	cout << "Enter the number of rows: "; //виведення повідомлення
+	n = check(2, MAX_SIZE); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the number of columns: "; //виведення повідомлення
+	m = check(2, MAX_SIZE); //внесення введення під цією змінною та перевірка через функцію
+}
+// ========== пошук кількості маршрутів ==========
+void pathsFinding(int n, int m)
+{
+	int paths[MAX_SIZE][MAX_SIZE]; //ініціалізація масиву масиву для зберігання кількості маршрутів до кожної клітини
+	int routeMatrix[MAX_SIZE][MAX_SIZE]; //ініціалізація масиву для зберігання матриці маршрутів
+	for (int i = 0; i < n; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+	{
+		paths[i][0] = 1; //кількість шляхів до клітини (i, 0)
+		routeMatrix[i][0] = 1; //внесення до масиву матриці
+	}
+	for (int j = 0; j < m; ++j) //доки коефіцієнт є нулем, менший за розмір і збільшується
+	{
+		paths[0][j] = 1; //кількість шляхів до клітини (0, j)
+		routeMatrix[0][j] = 1; //внесення до масиву матриці
+	}
+	for (int i = 1; i < n; ++i) //доки коефіцієнт є одиницею, менший за розмір і збільшується
+	{
+		for (int j = 1; j < m; ++j) //доки коефіцієнт є одиницею, менший за розмір і збільшується
+		{
+			paths[i][j] = paths[i - 1][j] + paths[i][j - 1] + paths[i - 1][j - 1]; //кількість шляхів до клітини (i, j) дорівнює сумі
+			routeMatrix[i][j] = 1;
+		}
+	}
+	cout << "Number of routes: " << paths[n - 1][m - 1] << endl; //виведення повідомлення
+	cout << "Path matrix:" << endl; //виведення повідомлення
+	for (int i = 0; i < n; ++i) //доки коефіцієнт є одиницею, менший за розмір і збільшується
+	{
+		for (int j = 0; j < m; ++j) //доки коефіцієнт є одиницею, менший за розмір і збільшується
+                {
+			cout << routeMatrix[i][j] << " "; //виведення матриці
+		}
+		cout << endl; //новий рядок
+	}
+}
+//========== основна функція ==========
+int main()
+{
+	identification(); //виклик функції ідентифікації
+	input(); //виклик функції введення
+	pathsFinding(n, m); //виклик функції пошуку кількості маршрутів
+	system("pause"); //пауза програми
+} //кінець
+
+Завдання 2
+//Виконати елементарні перетворення матриць: перестановку місцями будь - яких двох рядків або стовпців матриці; множення на ненульову константу будь - якого рядка або стовпця матриці; додавання до будь - якого рядка або стовпця матриці іншого рядка або стовпця, помноженого на ненульову константу
+//Для вибору способу створення матриці використовувати меню: введення значень елементів матриці з клавіатури або генерація псевдовипадкових чисел в заданому з клавіатури діапазоні значень
+//Індекси рядків та стовців матриці та число для множення рядка чи стовпця матриці для виконання елементарних перетворень задавати з клавіатури
+//Вивести на екран вхідну матрицю та усі її пертворення з відповідними повідомленнями
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <ctime> //бібліотека для використання генератора рандомних чисел
+#include <cstdlib> //бібліотека для використання генератора рандомних чисел
+using namespace std;
+const int MAX_ROW = 10; //константа для обчислень
+const int MAX_COLUMN = 10; //константа для обчислень
+int matrix[MAX_ROW][MAX_COLUMN]; //масив для матриці
+int row, column; //початкові розміри матриці
+int userChoice, range, range1; //вибір користувача і діапазони чисел матриці
+int rearrangeChoice, multiplicationChoice, additionChoice; //вибори користувача у функція зміни місцями, множення і додавання
+int row1, row2, column1, column2; //значення рядків і стовпців у функції зміни
+int constant, rowSelected, columnSelected; //константа, рядок і стовпець для функції множення
+int constant2, rowSelected2, columnSelected2, rowAdd, columnAdd; //константа, рядки і стовпеці для функції додавання
+// ========== ідентифікація автора та умови ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab7 var4" << endl;
+	cout << "Perform elementary matrix transformations:permutation of any two rows or columns of the matrix; multiplication by a non - zero constant of any row or column of the matrix; adding to any row or column of a matrix another row or column multiplied by a non - zero constant." << endl;
+	cout << "Use the menu to choose the method of creating a matrix: enter the values ​​of matrix elements from the keyboard or generate pseudo-random numbers in the range of values ​​specified from the keyboard." << endl;
+	cout << "Indexes of rows and columns of the matrix and the number for multiplying the row or column of the matrix to perform elementary transformations can be specified from the keyboard." << endl;
+	cout << "Display the input matrix and all its transformations with corresponding messages." << endl;
+}
+// ========== перевірка введення ==========
+int check(int mValue, int nValue)
+{
+	int value; //ініціалізація змінної
+	bool isValid = false; //булева змінна зі значенням правди
+	while (!isValid) //доки цикл справджується
+	{
+		cin >> value; //внесення введення
+		if (!cin || value < mValue || value > nValue || cin.peek() != '\n')  //якщо введення не є числом, менше за мінамальне або більше за максимальне значення, є дробовим
+		{
+			cout << "Invalid input. Try again: "; //виведення повідомлення
+			cin.clear(); //очищення потоку
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //інакше
+		{
+			isValid = true; //зміна значення на правду
+		}
+	}
+	return value; //повернення значення
+}
+// ========== введення ==========
+void input()
+{
+	cout << "==========================================" << endl; //виведення повідомлення
+	cout << "Enter the number of rows: "; //виведення повідомлення
+	row = check(2, MAX_ROW); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the number of columns: "; //виведення повідомлення
+	column = check(2, MAX_COLUMN); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Choose how you want to set the coefficients." << endl; //виведення повідомлення
+	cout << "1. Input from the keyboard." << endl;  //виведення повідомлення
+	cout << "2. Generate in range." << endl;  //виведення повідомлення
+	userChoice = check(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Choose the range of coefficients: " << endl; //виведення повідомлення
+	cout << "Enter the start: " << endl; //виведення повідомлення
+	range = check(1, 20); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the finish: " << endl; //виведення повідомлення
+	range1 = check(range, 20); //внесення введення під цією змінною та перевірка через функцію
+}
+// ========== вивід ==========
+void print(int matrix[MAX_ROW][MAX_COLUMN], int row, int column)
+{
+	for (int i = 0; i < row; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+	{
+		for (int j = 0; j < column; ++j) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			cout << matrix[i][j] << " "; //вивід масива матриці
+		}
+		cout << endl; //новий рядок
+	}
+}
+// ========== створення масиву матриці ==========
+void matrixGeneration()
+{
+	if (userChoice == 1) //якщо вибір 1
+	{
+		cout << "Input your numbers:" << endl; //виведення повідомлення
+		for (int i = 0; i < row; i++) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			for (int j = 0; j < column; ++j) //доки коефіцієнт є нулем, менший за розмір і збільшується
+			{
+				matrix[i][j] = check(0, range); //внесення значень до масиву та їх перевірка
+			}
+		}
+	}
+	else //якщо вибір 2
+	{
+		srand((unsigned)(time(NULL))); //функція генерації випадкових чисел
+		for (int i = 0; i < row; i++) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			for (int j = 0; j < column; ++j) //доки коефіцієнт є нулем, менший за розмір і збільшується
+			{
+				matrix[i][j] = range + rand() % (range1 - range + 1); //генерація псевдовипадкових чисел у діапазоні
+			}
+		}
+	}
+	print(matrix, row, column); //виведення масиву
+}
+// ========== зміна рядків/стовпців місцями ==========
+void rearrange()
+{
+	cout << "==========================================" << endl;
+	cout << "Chose what you want to rearrange." << endl; //виведення повідомлення
+	cout << "1. Rows " << endl;  //виведення повідомлення
+	cout << "2. Columns" << endl;  //виведення повідомлення
+	rearrangeChoice = check(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	if (rearrangeChoice == 1) //якщо вибір 1
+	{
+		cout << "Chose the rows to swap: " << endl; //виведення повідомлення
+		row1 = check(1, row); //внесення введення під цією змінною та перевірка через функцію
+		row2 = check(1, row); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < column; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			swap(matrix[row1-1][i], matrix[row2-1][i]); //зміна місцями
+		}
+	}
+	else //якщо вибір 2
+	{
+		cout << "Chose the columns to swap: " << endl; //виведення повідомлення
+		column1 = check(1, column); //внесення введення під цією змінною та перевірка через функцію
+		column2 = check(1, column); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < row; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			swap(matrix[i][column1-1], matrix[i][column2 - 1]); //зміна місцями
+		}
+	}
+	cout << endl; //новий рядок
+	print(matrix, row, column); //виведення масиву
+}
+// множення рядка/стовпця на константу ==========
+void multiplication()
+{
+	cout << "==========================================" << endl;
+	cout << "Chose what you want to multiply." << endl; //виведення повідомлення
+	cout << "1. Row " << endl;  //виведення повідомлення
+	cout << "2. Column" << endl;  //виведення повідомлення
+	multiplicationChoice = check(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the constant: " << endl; //виведення повідомлення
+	constant = check(1, 10); //внесення введення під цією змінною та перевірка через функцію
+	if (multiplicationChoice == 1) //якщо вибір 1
+	{
+		cout << "Chose the row: " << endl; //виведення повідомлення
+		rowSelected = check(1, row); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < column; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[rowSelected - 1][i] *= constant; //множення на константу
+		}
+	}
+	else //якщо вибір 2
+	{
+		cout << "Chose the column: " << endl; //виведення повідомлення
+		columnSelected = check(1, column); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < row; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[i][columnSelected - 1] *= constant; //множення на константу
+		}
+	}
+	cout << endl; //новий рядок
+	print(matrix, row, column); //виведення масиву
+}
+// ========== додавання до рядка/стовпця рядка/стовпця, помноженого на константу ==========
+void addition()
+{
+	cout << "==========================================" << endl;
+	cout << "Chose what you want to add." << endl; //виведення повідомлення
+	cout << "1. Row " << endl;  //виведення повідомлення
+	cout << "2. Column" << endl;  //виведення повідомлення
+	additionChoice = check(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the constant: " << endl; //виведення повідомлення
+	constant2 = check(1, 10); //внесення введення під цією змінною та перевірка через функцію
+	if (additionChoice == 1) //якщо вибір 1
+	{
+		cout << "Chose the row you want to multiply: " << endl; //виведення повідомлення
+		rowAdd = check(1, row); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < column; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[rowAdd - 1][i] *= constant2; //множення на константу
+		}
+		cout << "Chose the row to add: " << endl; //виведення повідомлення
+		rowSelected2 = check(1, row); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < column; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[rowSelected2 - 1][i] += matrix[rowAdd - 1][i]; //додавання до рядка помноженого на константу рядка
+		}
+	}
+	else //якщо вибір 2
+	{
+		cout << "Chose the column you want to multiply: " << endl; //виведення повідомлення
+		columnAdd = check(1, column); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < row; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[i][columnAdd - 1] *= constant2; //множення на константу
+		}
+		cout << "Chose the column to add: " << endl; //виведення повідомлення
+		columnSelected2 = check(1, column); //внесення введення під цією змінною та перевірка через функцію
+		for (int i = 0; i < row; ++i) //доки коефіцієнт є нулем, менший за розмір і збільшується
+		{
+			matrix[i][columnSelected2 - 1] += matrix[i][columnAdd - 1]; //додавання до стовпця помноженого на константу стовпця
+		}
+	}
+	cout << endl; //новий рядок
+	print(matrix, row, column); //виведення масиву
+}
+// ========= основна функція ==========
+int main()
+{
+	identification(); //виклик функції ідентифікації
+	input(); //виклик функції введення
+	matrixGeneration(); //створення масиву матриці
+	rearrange(); //виклик функції зміни рядків/стовпців місцями
+	multiplication(); // множення рядка/стовпця на константу
+	addition(); //додавання до рядка/стовпця рядка/стовпця, помноженого на константу
+	system("pause"); //пауза програми
+} //кінець

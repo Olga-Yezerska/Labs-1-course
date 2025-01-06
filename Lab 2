@@ -1,0 +1,88 @@
+   Завдання 1
+// Вкладені рогалуження
+#include <iostream> //Файл для операцій введення та виведення
+#include <math.h> //Заголовний файл для математичних функцій
+using namespace std; //Простір стандартних імен
+int main()
+{
+	cout << "Student Olha Yezerska, gr SE-12, lab2 var5" << endl;
+	float y, a, b, x; //Оголошення змінних для результату та вхідних даних
+	cout << "Define y: "<<endl; //Умова задачі
+	cout << "y = (1 + x) * (1 - x), if (x < 0) and (a = b)"<<endl; 
+	cout << "y = (a * pow(x, 3)) - b, if (x = 0) and (a >< b)"<<endl;
+	cout << "(a * pow(x, 2)) + (b / x), if x > 0"<<endl;
+	cout << "Input variable a, b, x: "<<endl; //Отримання значень змінних а, b, i x від користувача
+	cin >> a >> b >> x; //Внесення змінних ло програми
+	if (x < 0 && a != b)
+	{
+		cout << "Wrong variables" << endl;
+	}
+	if (x == 0 && a == b)
+	{
+		cout << "Wrong variables" << endl;
+	}
+	if (x < 0 && a == b) 
+	{
+		y = (1 + x) * (1 - x); //Перевірка першої умови, обчислення першого виразу
+		cout << "b = " << b << " a = " << a << " x = " << x << endl; //Виведення значення зміних на екран
+		cout << "result : y = " << y << endl; //Виведення результату
+	}
+	else if (x == 0 && a != b) 
+	{
+		y = (a * pow(x, 3)) - b; //Перевірка другої умови, обчислення другого виразу
+		cout << "b = " << b << " a = " << a << " x = " << x << endl; //Виведення значення зміних на екран
+		cout << "result : y = " << y << endl; //Виведення результату
+	}
+	else if (x > 0) 
+	{
+		y = (a * pow(x, 2)) + (b / x); //Перевірка третьої умови, обчислення третього виразу
+		cout << "b = " << b << " a = " << a << " x = " << x << endl; //Виведення значення зміних на екран
+		cout << "result : y = " << y << endl; //Виведення результату
+	}
+	system("pause");
+} //кінець програми
+Завдання 2
+// Перевірка належності точки координатним чвертям
+#include <iostream> //файл для операцій введення та виведення
+#include <math.h> //заголовний файл для математичних функцій
+using namespace std; //простір стандартних імен
+int main()
+{
+	cout << "Student Olha Yezerska, gr SE-12, lab2 var5" << endl;
+	float x, y, distance; //Оголошення змінних для результату та вхідних даних
+	cout << "Belonging to the coordinaye quarter: " << endl; //Умова задачі
+	cout << "Enter (x,y):" << endl; //Отримання значень х та у від користувача
+	cin >> x >> y; //Внесення змінних ло програми
+	if (x > 0 && y > 0) //Перевірка першої умови
+	{
+		cout << "The point belongs to the first coordinate quarter" << endl; //Виведення результату
+		distance = sqrt(pow(x - 0, 2) + pow(y - 0, 2)); //Обчислення відстані
+		cout << "Distance: " << distance << endl; //Виведення результату
+	}
+	else if (x < 0 && y > 0)
+	{
+		cout << "The point belongs to the second coordinate quarter" << endl; //Перевірка другої умови та виведення результату
+	}
+	else if (x < 0 && y < 0)
+	{
+		cout << "The point belongs to the third coordinate quarter" << endl; //Перевірка третьої умови та виведення результату
+	}
+	else if (x > 0 && y < 0)
+	{
+		cout << "The point belongs to the fourth coordinate quarter" << endl;//Перевірка четвертої умови та виведення результату
+	}
+	//Перевірка інших варіантів значення змінних
+	else if (x == 0 && y == 0)
+	{
+		cout << "The point is the origin of coordinates" << endl; //Перевірка п'ятої умови та виведення результату
+	}
+	else if (x == 0 && y != 0)
+	{ 
+		cout << "The point belongs to the y-axis" << endl; //Перевірка шостої умови та виведення результату
+	}
+	else if (x != 0 && y == 0)
+	{
+		cout << "The point belongs to the x-axis" << endl; //Перевірка сьомої умови та виведення результату
+	}
+	system("pause");
+} //кінець програми

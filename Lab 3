@@ -1,0 +1,103 @@
+   //Циклічні обчислювальні процеси
+#include <iostream> //файл для операцій введення та виведення
+#include <iomanip>  
+#include <float.h> 
+using namespace std; //простір стандартних імен
+int x; //параметр зовнішньої суми
+int k; //параметр внутрішньої суми
+float sum = 0; // сума ряду
+float accuracy = 0; //точність розрахунків
+float numerator; //чисельник елемента ряду
+float denominator; //знаменник елемента ряду
+float member; //елемент ряду
+//============ідентифікація розробника============
+void welcome()
+{
+	//identification of developer
+	cout << "Student Olha Yezerska, gr SE-12, lab3 var5" << endl;
+	//content of problem
+	cout << "==========================================================" << endl;
+	cout << "To calculate thee sum of th row" << endl;
+	cout << "external sum for x from 1 to 5" << endl;
+	cout << "internal sum for k from 0 to intirnity" << endl;
+	cout << "the formula includes exponentiation and factorials" << endl;
+	cout << "5      inf" << endl;
+	cout << "sum    sum  (-1)^k * x^(k + 2) / (k + 1) * (k + 2)!" << endl;
+	cout << "x=1    k=0" << endl;
+	cout << "==========================================================" << endl;
+	cout << "internal sum is written for the elements at k = 0, 1, 2,..." << endl;
+	cout << "x^2 / 2! - x^3 / 2 * 3! + x^4 / 3 * 4! - x^5 / 4 * 5!..." << endl;
+	cout << "in the numerator are the factorials for odd numbers: 1!, 3!, 5!, 7! eyc." << endl;
+	cout << "in the denominator are the factorials of successive numbers: 0!, 2!, 4! etc." << endl;
+	cout << "the exponents are the sequence: 3, 4, 5 etc." << endl;
+}
+//============виведення поточних рохрахунків============
+void displaySum()
+{
+	//виведення результатів в таблицю
+	//setw() - маніпулятор для визначення ширини поля виведення, що забезпечує
+	//вирівнювання стовпчиків по правому краю для цифрових значень
+	cout << setw(5) << x << setw(5) << k << setw(15) << member << setw(15) << sum << endl;
+}
+//============обчислення елемента ряду та суми============
+void calcMemberAndSum()
+{
+	float xstep; //х в степені (k + 2)
+	float fact = 1; //факторіал (k + 2)
+	for (x = 1; x <= 5; x++) //цикл по зовнішній сумі
+	{
+		k = 0; //початкове значення параметра внутрішньої суми
+		//формування першого елемента ряду і початкової суми ряду, що дорівнює першому елементу ряду
+		xstep = x * x; //х^(k+2) при k = 0
+		fact = 2; //значення факторіалу (k + 2) при k = 0
+		numerator = xstep; //значення чисельника при k = 0
+		denominator = fact;//значення знаменника при k = 0
+		member = xstep / fact;//значення елемента ряду при k = 0
+		sum += member;//сума ряду як сума поточних елементів
+		displaySum();//виведення першого розрахунку
+		do
+		{
+			k++;//перейти до наступного елемента ряду при заданому х
+			xstep *= x;//розрахунок степеня як добуток степеня на попередньому кроці та числа х
+			fact *= k + 2;//розрахунок факторіала як добуток факторіала на попередньому кроці та (k + 2)
+			numerator = xstep; //розрахунок чисельника як степеня х
+			denominator = (k + 1) * fact;//розрахунок знаменника як добуток (k + 1) та факторіала
+			member = numerator / denominator;//розрахунок знчення елементу ряда
+			//перевірка на переповнення float
+			if ((member < FLT_MIN) || (member > FLT_MAX))//якщо значення менше за 10^-38 або більше за 10^38
+			{
+				//тоді виводиться повідомлення про переповнення
+				cout << "overflow float member - break cycle with k" << endl;
+				break;//переривання цикла по параметру k та збільшення значення параметру х
+			}
+			if (k % 2 != 0)//знаки елементів ряду чергуються: елементи, що є парні по порядку додатні
+				member *= -1;
+			sum += member;//накопичення суми
+			displaySum();//виведення поточного розрахунку
+		} while (fabs(member) > accuracy);//перевірка поточного елемента на відповідність точності розрахунку
+		cout << "==========================================================" << endl;
+	}
+}
+//============
+int main()
+{
+	welcome();
+	bool answer = 0;//відповідь для повторення циклу
+	do
+	{
+		cout << "==========================================================" << endl;
+		//cout << "sum (sum ( ((-1)^k * x^(k+2)) / ((k + 1) * (k + 2)!) )" << endl;
+		cout << "Enter the accurancy of the calculation: " << endl;
+		cin >> accuracy;
+		cout << "result of iterations" << endl;
+		cout << "==========================================================" << endl;
+		cout << "    x    k        member            sum     " << endl;
+		cout << "==========================================================" << endl;
+		calcMemberAndSum();
+		cout << " sum = " << sum << endl;
+		sum = 0;//обнуляємо суму рядка для повторного розрахунку
+		accuracy = 0;//обнуляємо точність розрахунків
+		cout << "\n do you want to continue? Yes = 1, No = 0" << endl;
+		cin >> answer;
+	} while (answer != 0);
+}

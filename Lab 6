@@ -1,0 +1,658 @@
+   Завдання 1
+//Створити два числових масиви, кількість елементів яких ввести з клавіатури
+//Передбачити меню вибору способу створення масиву: введення з клавіатури або генерація псевдовипадкових чисел
+//Знайти найменший серед тих елементів першого масиву, які співпадають із значеннями елементів другого масиву
+//Вивести на екран масиви, найменший елемент та його індекс
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <ctime>    //підключення бібліотеки для time()
+using namespace std;
+const int MAX_SIZE = 10; //максимальна кількість елементів масиву
+int firstArray[MAX_SIZE]; //перший масив
+int secondArray [MAX_SIZE]; //другий масив
+int first, second; //кількість елементів першого і другого масивів
+int minMatch; //змінна для зберігання  мінімального збігу
+bool found; //змінна для зберігання булевої змінної
+int index; //змінна для зберігання індекса
+// ========= ідентифікація автора та умова задачі ==========
+void identification()
+{
+	//вивід повідомлень ідентифікації та умови
+	cout << "Student Olha Yezerska, gr SE-12 lab6 var4" << endl;
+	cout << "Create two numeric arrays, the number of elements of which are entered from the keyboard." << endl;
+	cout << "Provide a menu for choosing the method of creating an array: input from the keyboard or generation of pseudo-random numbers." << endl;
+	cout << "Find the smallest among those elements of the first array that coincide with the values ​​of the elements of the second array." << endl;
+	cout << "Display arrays, the smallest element and its index." << endl;
+	cout << "===================================================" << endl;
+}
+// ========= функція отримання кількості елементів від користувача ==========
+void number() //функція для обраної мети
+{
+	cout << "Enter the number of elements in first array: " << endl; //вивід повідомлення
+	bool validInputFirst = false; //булева змінна для перевірки введення
+	while (!validInputFirst) //доки введення некоректне
+	{
+		cin >> first; //внесення введеного значення 
+		if (!cin || first > MAX_SIZE || first <= 0 || cin.peek() != '\n') //якщо введення не є числом, більше за константу, менше або дорівнює нулю, є дробовим або має зайві символи
+		{
+			cout << "Invalid input. Try again." << endl; //вивід повідомлення помилку
+			cin.clear();//очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');//ігнорування залишків
+		}
+		else //або умови не справджуються
+		{
+			validInputFirst = true; //вихід із циклу
+		}		
+	}
+	bool validInputSecond = false; //булева змінна для перевірки введення
+	cout << "Enter the number of elements in second array: " << endl; //вивід повідомлення
+	while (!validInputSecond) //доки введення некоректне
+	{
+		cin >> second; //внесення введеного значення
+		if (!cin || second > MAX_SIZE || second <= 0 || cin.peek() != '\n') //якщо введення не є числом, більше за константу, менше або дорівнює нулю, є дробовим або має зайві символи
+		{
+			cout << "Invalid input. Try again." << endl; //вивід повідомлення помилку
+			cin.clear();//очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //або умови не справджуються
+		{
+			validInputSecond = true; //вихід із циклу
+		}
+	}
+}
+// ========= функція генерування "рандомних" чисел ==========
+void generateNumbers(int array[], int size) 
+{
+	srand((unsigned)time(NULL));
+	for (int i = 0; i < size; ++i) //для масиву, заданого розміру
+	{
+		array[i] = rand() % 101;  //генерація псевдовипадкових чисел від 0 до 100
+	}
+}
+// ========= отримання вибору від користувача та створення масивів ==========
+void choice()
+{
+	int userChoiceFirst, userChoiceSecond; //оголошення змінної
+	cout << "How do you want to create the first array?" << endl; //вивід повідомлення-меню вибору
+	cout << "1.Input from the keyboard." << endl; //вивід повідомлення про варіант 1
+	cout << "2.Generation of random numbers." << endl; //вивід повідомлення про варіант 2
+	bool validInputChoiceFirst = false; //булева змінна зі значенням брехні
+	while (!validInputChoiceFirst) //доки цикл справджується
+	{
+		cin >> userChoiceFirst; //внесення введення
+		if ((userChoiceFirst != 1 && userChoiceFirst != 2) || cin.peek() != '\n') //якщо введення не є 1 чи 2 або має символи
+		{
+			cout << "Invalid input. Try again:" << endl; //вивід повідомлення про помилку
+			cin.clear(); //очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //або умова не справджується
+		{
+			validInputChoiceFirst = true; //вихід із циклу
+		}
+	}
+	if (userChoiceFirst == 1) //якщо перший вибір
+	{
+		cout << "==================" << endl;
+		cout << "Input your numbers:" << endl; //вивід повідомлення про введення елементів масиву
+		for (int i = 0; i < first; i++) //поки кількість елементів не досягла введеного розміру
+		{
+			bool validInputFirstArray = false; //булева змінна зі значенням брехні
+			while (!validInputFirstArray) //доки цикл справджується
+			{
+				cin >> firstArray[i]; //внесення введення
+				if (!cin || firstArray[i] < 0 || cin.peek() != '\n' || firstArray[i] > 100) //якщо введення не є числом, є меншим за нуль, має символи або є більшим за нуль
+				{
+					cout << "Invalid input. Please enter a positive integer." << endl; //вивід повідомлення про помилку
+					cin.clear(); //очищення потоку введення
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');  //ігнорування залишків
+				}
+				else //абоо умова не справджується
+				{
+					validInputFirstArray = true; //вихід із циклу
+				}
+			}
+		}
+	}
+	if (userChoiceFirst == 2) //якщо другий вибір
+	{
+		cout << "==================" << endl;
+		generateNumbers(firstArray, first); //виклик функції про генерацію
+	}
+	cout << "How do you want to create the second array?" << endl; //вивід повідомлення-меню вибору
+	cout << "1.Input from the keyboard." << endl; //вивід повідомлення про варіант 1
+	cout << "2.Generation of random numbers." << endl; //вивід повідомлення про варіант 2
+	bool validInputChoiceSecond = false; //булева змінна зі значенням брехні
+	while (!validInputChoiceSecond) //доки цикл справджується
+	{
+		cin >> userChoiceSecond; //внесення введення
+		if ((userChoiceSecond != 1 && userChoiceSecond != 2) || cin.peek() != '\n') //якщо введення не є 1 чи 2 або має символи
+		{
+			cout << "Invalid input. Try again:" << endl; //вивід повідомлення про помилку
+			cin.clear(); //очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //або умова не справджується
+		{
+			validInputChoiceSecond = true; //вихід із циклу
+		}
+	}
+	if (userChoiceSecond == 1) //якщо перший вибір
+	{
+		cout << "==================" << endl;
+		cout << "Input your numbers:" << endl; //вивід повідомлення про введення елементів масиву
+		for (int i = 0; i < second; i++) //поки кількість елементів не досягла введеного розміру
+		{
+			bool validInputSecondArray = false; //булева змінна зі значенням брехні
+			while (!validInputSecondArray) //доки цикл справджується
+			{
+				cin >> secondArray[i]; //внесення введення
+				if (!cin || secondArray[i] < 0 || cin.peek() != '\n' || secondArray[i] > 100) //якщо введення не є числом, є меншим за нуль, має символи або є більшим за нуль
+				{
+					cout << "Invalid input. Please enter a positive integer." << endl; //вивід повідомлення про помилку
+					cin.clear(); //очищення потоку введення
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');  //ігнорування залишків
+				}
+				else //абоо умова не справджується
+				{
+					validInputSecondArray = true; //вихід із циклу
+				}
+			}
+		}
+	}
+	if (userChoiceSecond == 2) //якщо другий варіант
+	{
+		cout << "==================" << endl;
+		generateNumbers(secondArray, second); //виклик функції про генерацію
+	}
+}
+// ========= функція знаходження мінімального збігу та визначення його індексу у першому масиві ==========
+void minArrayMatch()
+{
+	minMatch = INT_MAX; //ініціалізація мінімуму найбільшим можливим значенням
+	found = false; //булева змінна для перевірки наявності збігів зі значенням брехні
+	index = -1; //ініціалізація індексу
+	for (int i = 0; i < first; i++) //поки кількість елементів не досягла введеного розміру першого масиву
+	{
+		for (int j = 0; j < second; j++) //поки кількість елементів не досягла введеного розміру другого масиву
+		{
+			if (firstArray[i] == secondArray[j]) //якщо якесь значення з першого масиву збіглось зі значення з другого масиву
+			{
+				found = true;  // зміна булевої змінної на правду
+				if (firstArray[i] < minMatch)  // якщо це значення менше за мінімальне
+				{
+					minMatch = firstArray[i]; //ініціалізація мінімуму як знайдене значення
+					index = i; //зміна індекса
+				}
+			}
+		}
+	}
+}
+// ========= функція виведення усіх знайдених відомостей ==========
+void print() 
+{
+	cout << "First array: "; //вивід повідомлення
+	for (int i = 0; i < first; i++) //поки кількість елементів не досягла введеного розміру
+	{
+		cout << firstArray[i] << " ";  // вивід масиву 1
+	}
+	cout << endl;  //новий рядок
+	cout << "Second array: "; //вивід повідомлення
+	for (int i = 0; i < second; i++) //поки кількість елементів не досягла введеного розміру
+	{
+		cout << secondArray[i] << " ";  //вивід масиву 2
+	}
+	cout << endl;  //новий рядок
+	if (found) //якщо булева змінна - правда
+	{
+		cout << "The smallest common element: " << minMatch << endl; //вивід повідомлення про мінімальний збіг і його значення
+		cout << "The index: " << index; //вивід повідомлення про індекс мінімального збігу
+	} 
+	else //якщо булева змінна - брехня
+	{
+		cout << "No common elements found." << endl; //вивід повідомлення про відсутність мінімального збігу
+	}
+}
+// ========= основна функція  ==========
+int main()
+{	
+	identification(); //виклик функції ідентифікації
+	number(); //виклик функції отримання кількості елементів масивів від користувача
+	choice(); //виклик функції вибору варіанта створення масивів і їх створення
+	minArrayMatch(); //виклик функції знаходження мінімального збігу та визначення його індексу у першому масиві
+	print(); //виклик функції  виведення усіх знайдених відомостей
+	system("pause"); //пауза програми
+} //кінець
+Завдання 2
+//Створити одновимірний масив, кількість елементів якого ввести з клавіатури
+//Передбачити меню вибору способу створення масиву: введення з клавіатури або генерація псевдовипадкових чисел
+//Відсортувати масив за алгоритмом швидкого cортування та здійснити пошук в масиві за алгоритмом рекурсивного бінарного пошуку
+//Передбачити виведення проміжних результатів в процесі виконання ітерацій сортування масиву
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <ctime>    //підключення бібліотеки для time()
+using namespace std;
+const int MAX_SIZE = 10; //максимальна кількість елементів у масиві
+int length, userArray[MAX_SIZE]; //оголошення довжини масиву та його самого
+int target; //значення, яке потрібно знайти бінарним пошуком
+// ========= ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab6 var4" << endl;
+	cout << "Create a one-dimensional array, the number of elements of which can be entered from the keyboard." << endl;
+	cout << "Provide a menu for choosing the method of creating an array: input from the keyboard or generation of pseudo-random numbers." << endl;
+	cout << "Sort the array using the quick sort algorithm and search the array using the recursive binary search algorithm." << endl;
+	cout << "Provide output of intermediate results in the process of executing array sorting iterations." << endl;
+	cout << "===================================================" << endl;
+}
+// ========= функція отримання кількості елементів від користувача ==========
+void number()
+{
+	cout << "Enter the number of elements in the array: " << endl; //вивід повідомлення
+	bool validInput = false; //булева змінна для перевірки введення
+	while (!validInput) //доки введення некоректне
+	{
+		cin >> length; //внесення введеного значення 
+		if (!cin || length > MAX_SIZE || length <= 0 || cin.peek() != '\n') //якщо введення не є числом, більше за константу, менше або дорівнює нулю, є дробовим або має зайві символи
+		{
+			cout << "Invalid input. Try again." << endl; //вивід повідомлення помилку
+			cin.clear();//очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');//ігнорування залишків
+		}
+		else //або умови не справджуються
+		{
+			validInput = true; //вихід із циклу
+		}
+	}
+}
+// ========= отримання вибору від користувача та створення масиву ==========
+void choice()
+{
+	int userChoice; //оголошення змінної
+	cout << "How do you want to create the array?" << endl; //вивід повідомлення-меню вибору
+	cout << "1.Input from the keyboard." << endl; //вивід повідомлення про варіант 1
+	cout << "2.Generation of random numbers." << endl; //вивід повідомлення про варіант 2
+	bool validInputChoice = false; //булева змінна зі значенням брехні
+	while (!validInputChoice) //доки цикл справджується
+	{
+		cin >> userChoice; //внесення введення
+		if ((userChoice != 1 && userChoice != 2) || cin.peek() != '\n') //якщо введення не є 1 чи 2 або має символи
+		{
+			cout << "Invalid input. Try again:" << endl; //вивід повідомлення про помилку
+			cin.clear(); //очищення потоку введення
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //або умова не справджується
+		{
+			validInputChoice = true; //вихід із циклу
+		}
+	}
+	if (userChoice == 1) //якщо перший вибір
+	{
+		cout << "==================" << endl;
+		cout << "Input your numbers:" << endl; //вивід повідомлення про введення елементів масиву
+		for (int i = 0; i < length; i++) //поки кількість елементів не досягла введеного розміру
+		{
+			bool validInputArray = false; //булева змінна зі значенням брехні
+			while (!validInputArray) //доки цикл справджується
+			{
+				cin >> userArray[i]; //внесення введення
+				if (!cin || userArray[i] < 0 || cin.peek() != '\n' || userArray[i] > 100) //якщо введення не є числом, є меншим за нуль, має символи або є більшим за нуль
+				{
+					cout << "Invalid input. Please enter a positive integer." << endl; //вивід повідомлення про помилку
+					cin.clear(); //очищення потоку введення
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');  //ігнорування залишків
+				}
+				else //абоо умова не справджується
+				{
+					validInputArray = true; //вихід із циклу
+				}
+			}
+		}
+	}
+	if (userChoice == 2) //якщо другий вибір
+	{
+		cout << "==================" << endl;
+		srand((unsigned)(time(NULL))); //ініціалізація генератора
+		for (int i = 0; i < length; i++)//поки кількість елементів не досягла введеного розміру
+		{
+			userArray[i] = rand() % 101; //генерація масиву
+		}
+	}
+}
+// ========= функція виведення  ==========
+void print(int userArray[], int size) //використання змінних
+{
+	for (int i = 0; i < length; i++) //поки кількість елементів не досягла введеного розміру
+	{
+		cout << userArray[i] << " ";  // вивід масиву
+	}
+	cout << endl;  //новий рядок
+}
+// ========= функція сортування алгоритмом швидкого сортування ==========
+void algorithm(int userArray[], int low, int high)
+{
+	int i = low; //найменше
+	int j = high; //найбільше
+	int pivot = userArray[(low + high) / 2]; //значення "pivot" - відносно якого будемо перевіряти
+	while (i <= j) //доки найменше значення менше/дорівнює найбільшому
+	{
+		while (userArray[i] < pivot) //поки елементи менші за опорний
+		{
+			i++; //збільшення і
+		}
+		while (userArray[j] > pivot) //поки елементи більші за опорний елемент
+		{
+			j--; //зменшення j
+		}
+		if (i <= j) //якщо i не перевищує j,
+		{
+			swap(userArray[i], userArray[j]); //обмін елементів місцями
+			i++; //наступний елемент зліва (найменші)
+			j--; //наступний елемент справа (найбільші)
+		}
+		print(userArray, length); //вивід проміжних результатів
+	}
+	if (low < j) //рекурсія лівої частини
+	{
+		algorithm(userArray, low, j);
+	}
+	if (i < high) //рекурсія правої частини
+	{
+		algorithm(userArray, i, high);
+	}
+}
+// ========== пошук в масиві за алгоритмом рекурсивного бінарного пошуку ==========
+int binarySearch(int userArray[], int low, int high, int target) 
+{
+	if (low > high) //якщо елемент не знайдений
+	{
+		return -1; //повернення значення -1
+	}
+	int mid = (low + high) / 2; //ініціалізація середнього значення то пошук його
+	if (userArray[mid] == target) // якщо елемент знайдено
+	{
+		return mid; //повернення йому середнього значення
+	}
+	else if (userArray[mid] > target) //пошук в лівій частині
+	{
+		return binarySearch(userArray, low, mid - 1, target); //виклик функції для сегмента з low до mid - 1 
+	}
+	else //пошук в правій частині
+	{
+		return binarySearch(userArray, mid + 1, high, target); //виклик функції для сегмента з mid + 1 до high
+	}
+}
+// ========= основна функція  ==========
+int main()
+{
+	identification(); //виклик функції ідентифікації
+	number(); //виклик функції отримання кількості елементів масивів від користувача
+	choice(); //виклик функції вибору варіанта створення масиву та його створення
+	cout << "Your array: "; //вивід повідомлення
+	print(userArray, length); //виклик функції виводу масву
+	cout << "Intermediate results: " << endl; //вивід повідомлення
+	algorithm(userArray, 0, length - 1); //виклик функції швидкого сортування
+	cout << "Sorted array: "; //вивід повідомлення
+	print(userArray, length); //виведення відсортованого масиву
+	cout << "Enter the number to search for: "; //вивід повідомлення
+	cin >> target; //внесення введеного значення
+	int result = binarySearch(userArray, 0, length - 1, target); //ініціалізація результату та виклик функції бінарного пошуку
+	if (result != -1) //якщо не дорівнює -1
+	{
+		cout << "Element found at index: " << result << endl; //вивід повідомлення
+	}
+	else //яякщо не дорівнює - 1 = значення існує
+	{
+		cout << "Element not found in the array." << endl; //вивід повідомлення
+	}
+	system("pause"); //пауза програми
+}//кінець
+
+Завдання 3
+//Увести з клавіатури цілі числа m, n - що є степенями двох многочленів, m>2, n>2
+//Увести або згенерувати у вказаному користувачем діапазоні значення коефіцієнтів двох многочленів
+//Значення деяких коефіцієнтів можуть дорівнювати нулю. Визначити і вивести на екран вирази, що є: сумою, різницею, добутком двох многочленів
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <ctime> //підключення бібліотеки для time()
+using namespace std;
+int firstPower, secondPower; //змінні для степенів
+int range; //діапазон коефіцієнтів
+int coefFirst[50], coefSecond[50]; //масиви коефіцієнтів
+int userChoice; //вибор користувача
+const int MAX_SIZE = 50; //константа для обчислень
+// ========= ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab6 var4" << endl;
+	cout << "Enter from the keyboard integers m, n - which are degrees of two polynomials, m>2, n>2." << endl;
+	cout << "Enter or generate the value of the coefficients of two polynomials in the range specified by the user." << endl;
+	cout << "Define and display the following expressions: sum,  difference of two polynomials, product of two polynomials." << endl;
+}
+// ========== функція перевірки введення ==========
+int inputInteger(int minValue, int maxValue) 
+{
+	int value; //ініціалізація змінної
+	bool isValid = false; //булева змінна зі значенням правди
+	while (!isValid) //доки цикл справджується
+	{
+		cin >> value; //внесення введення
+		if (!cin || value < minValue || value > maxValue || cin.peek() != '\n')  //якщо введення не є числом, менше за мінамальне або більше за максимальне значення, є дробовим
+		{
+			cout << "Invalid input. Try again: "; //виведення повідомлення
+			cin.clear(); //очищення потоку
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+		}
+		else //інакше
+		{
+			isValid = true; //зміна значення на правду
+		}
+	}
+	return value; //повернення значення
+
+}
+// ========== функція введення ==========
+void input() 
+{
+	cout << "Enter the power to the first polynomial: "; //виведення повідомлення
+	firstPower = inputInteger(3, MAX_SIZE); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Enter the power to the second polynomial: "; //виведення повідомлення
+	secondPower = inputInteger(3, MAX_SIZE); //внесення введення під цією змінною та перевірка через функцію
+	cout << "Choose the range of coefficients: "; //виведення повідомлення
+	range = inputInteger(1, 100); //внесення введення під цією змінною та перевірка через функцію
+}
+// ========== функція генерації рандомних чисел ==========
+void generateNumbers(int array[], int size)
+{
+	for (int i = 0; i < size; ++i) //для масиву, заданого розміру
+	{
+		array[i] = rand() % range;  //генерація псевдовипадкових чисел від 0 до діапазону
+	}
+}
+// ========== функція вибору створення масиву ==========
+void choice()
+{
+	cout << "Choose how you want to set the coefficients for the first polynomial." << endl; //виведення повідомлення
+	cout << "1. Input from the keyboard." << endl;  //виведення повідомлення
+	cout << "2. Generate in range." << endl;  //виведення повідомлення
+	userChoice = inputInteger(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	if (userChoice == 1) //якщо вибір 1
+	{
+		cout << "Input your numbers:" << endl; //виведення повідомлення про помилку
+		for (int i = 0; i < firstPower; i++) //поки кількість елементів не досягла введеного розміру
+		{
+			coefFirst[i] = inputInteger(0, range); //внесення введення під цією змінною та перевірка через функцію
+		}
+	}
+	else//якщо вибір 2
+	{
+		generateNumbers(coefFirst, firstPower);//виклик функції генерації чисел
+	}
+	cout << "Choose how you want to set the coefficients for the second polynomial." << endl; //виведення повідомлення
+	cout << "1. Input from the keyboard." << endl; //виведення повідомлення
+	cout << "2. Generate in range." << endl; //виведення повідомлення
+	userChoice = inputInteger(1, 2); //внесення введення під цією змінною та перевірка через функцію
+	if (userChoice == 1) //якщо вибір 1
+	{
+		cout << "Input your numbers:" << endl; //виведення повідомлення про помилку
+		for (int i = 0; i < secondPower; i++) //поки кількість елементів не досягла введеного розміру
+		{
+			coefSecond[i] = inputInteger(0, range); //внесення введення під цією змінною та перевірка через функцію
+		}
+	}
+	else //якщо вибір 2
+	{
+		generateNumbers(coefSecond, secondPower); //виклик функції генерації чисел
+	}
+}
+// ========== функція додавання многочленів ==========
+void addPolynomials()
+{
+	int maxDeg = max(firstPower, secondPower); //ідентифікація змінної максимального степеня
+	if (firstPower == secondPower) //якщо степені рівні
+	{
+		for (int i = 0; i <= maxDeg - 1; i++) //поки кількість елементів не досягла максимального степеня - 1
+		{
+			int sum = 0; //ідентифікація змінної
+			if (i <= firstPower)  //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				sum += coefFirst[i]; //додати його до суми
+			}
+			if (i <= secondPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				sum += coefSecond[i];  //додати його до суми
+			}
+			cout << sum << "x^" << firstPower - i; //виведення суми та степеня
+			if (i < maxDeg - 1) //якщо коефіцієнт менший максимального степеня - 1
+			{
+				cout << " + "; //виведення плюса
+			}
+		}
+	}
+	else //якщо степені не рівні
+		{
+			for (int i = 0; i <= maxDeg-1; i++) //поки кількість елементів не досягла максимального степеня - 1
+			{
+				if (i <= firstPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+				{
+					cout << "( "; //виведення дужки 
+					cout << coefFirst[i] << "x^" << firstPower - i; //виведення елемента масиву та степеня
+				}
+				if (i <= secondPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+				{
+					if (i <= firstPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+					{
+						cout << " + ";  //виведення плюса
+					}
+					cout << coefSecond[i] << "x^" << secondPower - i << " )";  //виведення елемента масиву та степеня
+				}
+				if (i < maxDeg - 1) //якщо коефіцієнт менший максимального степеня - 1
+				{
+					cout << " + "; //виведення плюса
+				}
+			}
+	}
+	cout << endl; //новий рядок
+}
+// ========== функція віднімання многочленів ==========
+void subPolynomials()
+{
+	int maxDeg = max(firstPower, secondPower); //ідентифікація змінної максимального степеня
+	if (firstPower == secondPower) //якщо степені рівні
+	{
+		for (int i = 0; i <= maxDeg-1; i++) //поки кількість елементів не досягла максимального степеня - 1
+		{
+			int sub = 0; //ініціалізація змінної 
+			if (i <= firstPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				sub += coefFirst[i]; //додати його до різниці
+			}
+			if (i <= secondPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				sub -= coefSecond[i]; //відняти його від різниці
+			}
+			cout << sub << "x^" << firstPower - i; //виведення різниці та степеня
+			if (i < maxDeg - 1) //якщо коефіцієнт менший максимального степеня - 1
+			{
+				cout << " + "; //виведення плюса
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i <= maxDeg-1; i++) //поки кількість елементів не досягла максимального степеня - 1
+		{
+			if (i <= firstPower)//якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				cout << "( "; //виведення дужки
+				cout << coefFirst[i] << "x^" << firstPower - i; //виведення елемента масиву та степеня
+			}
+			if (i <= secondPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				if (i <= firstPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+				{
+					cout << " - "; //виведення мінуса
+				}
+				cout << coefSecond[i] << "x^" << secondPower - i << " )";  //виведення елемента масиву та степеня
+			}
+			if (i < maxDeg - 1) //якщо коефіцієнт менший максимального степеня - 1
+			{
+				cout << " + "; //виведення плюса
+			}
+		}
+	}
+	cout << endl; //новий рядок
+}
+void multPolynomials()
+{
+	int maxDeg = max(firstPower, secondPower); //ідентифікація змінної максимального степеня
+		for (int i = 0; i <= maxDeg - 1; i++) //поки кількість елементів не досягла максимального степеня - 1
+		{
+			int mult = 0; //ініціалізація змінної
+			if (i <= firstPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				mult += coefFirst[i]; //додати його до добутка
+			}
+			if (i <= secondPower) //якщо коефіцієнт масиву менше/дорівнює степеню
+			{
+				mult *= coefSecond[i]; //домножити добуток на елемент
+			}
+			cout << mult << "x^" << (firstPower - i) + (secondPower - i) << " "; //виведення добутка та степеня
+			if (i < maxDeg - 1) //якщо коефіцієнт менший максимального степеня - 1
+			{
+				cout << " + "; //виведення плюса
+			}
+		}
+		cout << endl; //новий рядок
+}
+// ========== функція виведення ==========
+void print() 
+{
+	cout << "Your first coefficients: ";  //виведення повідомлення
+	for (int i = 0; i < firstPower; i++) //поки кількість елементів не досягла введеного розміру
+	{
+		cout << coefFirst[i] << " "; //виведення масиву
+	}
+	cout << endl; //новий рядок
+	cout << "Your second coefficients: ";  //виведення повідомлення
+	for (int i = 0; i < secondPower; i++) //поки кількість елементів не досягла введеного розміру
+	{
+		cout << coefSecond[i] << " "; //виведення масиву
+	}
+	cout << endl; //новий рядок
+}
+// ========== основна функція ==========
+int main()
+{
+	srand((unsigned)time(NULL)); //генерація чисел
+	identification(); //виклик функції ідентифікації
+	input(); //виклик функції введення
+	choice(); //виклик функції вибору
+	print(); //виклик функції виведення
+	cout << "Sum: ";  //виведення повідомлення
+	addPolynomials(); //виклик функції додавання
+	cout << "Sub: ";  //виведення повідомлення
+	subPolynomials(); //виклик функції віднімання
+	cout << "Mult: ";  //виведення повідомлення
+	multPolynomials(); //виклик функції множення
+	system("pause"); //пауза програми
+} //кінець

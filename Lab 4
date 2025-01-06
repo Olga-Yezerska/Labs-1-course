@@ -1,0 +1,235 @@
+   Завдання 1
+//Розрахувати функцію, розвинувши її в ряд Тейлора
+//     { arcsin(x/2) / arcsin(2*x)  -2 <= x < 0
+// y = { 
+//     { arcsin(x+5) + arcsin(x^2)    0 <= x <= 2
+// 
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <iomanip> //підключення бібліотеки для форматування виведення
+#include <cmath> //підключення бібліотеки для математичних розрахунків
+#include <limits> // для використання numeric_limits
+using namespace std;
+float y, //вираз за формулою Тейлора
+x, //аргумент функції
+sf, //значення стандартної функції арксинуса
+xs, xf, //початкове та кінцеве значення аргумента
+xst, error, //крок зміни аргумента та похибка
+accuracy; //точність розрахунків
+bool flag; //ознака визначення можливості розрахунку функції
+//========== ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab4 var4" << endl;
+	cout << "Calculate a function from an expression" << endl <<
+		"     | arcsin(x/2) / arcsin(2*x),    if -2 <= x < 0 " << endl <<
+		" y = |  " << endl <<
+		"     | arcsin(x+5) + arcsin(x^2),    if 0 <= x <= 2 " << endl;
+	cout << "Use the expansion of the arcsin in the Taylor series" << endl <<
+		" x + x^3/6 + (3 * x^5)/40 + (15 * x^7)/336 + ... " << endl << endl;
+}
+//========== введення вхідних змінних ==========
+void input()
+{
+    cout << "Enter the start and the end of the function argument:" << endl; //виведення повідомлення
+    while (true) //доки умова правдива
+    {
+        cout << "Start x: "; //виведення повідомлення
+        if (!(cin >> xs)) //якщо введення не число
+        {
+            cout << "Error!" << endl; //виведення повідомлення про помилку
+        }
+        else//або
+        {
+            cout << "End x: "; //виведення повідомлення
+            if (!(cin >> xf) || xs > xf)//якщо введення не число або початкове значення є більшим за кінцеве
+            {
+                    cout << "Error!" << endl; //виведення повідомлення про помилку
+            }
+            else//якщо умова не правдива
+            {
+                break;//вихід
+            }
+        }
+        cin.clear();//очищення потоку введення
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');//ігнорування залишків
+        cout << "Please try again." << endl; //виведення повідомлення про повторну спробу
+    }
+    cout << "Enter the change step: "; //виведення повідомлення
+    while (true)//доки умова коректна
+    {
+        if (!(cin >> xst) || xst == 0)//якщо введенння не є числом або дорівнює нулю
+        {
+                cout << "Error!" << endl; //виведення повідомлення про помилку
+        }
+        else//якщо умова не справджується
+        {
+            break;//вихід
+        }
+		cin.clear();//очищення потоку введення
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');//ігнорування залишків
+		cout << "Please try again: "; //виведення повідомлення про повторну спробу
+    }
+    cout << "Enter the accuracy of the calculations: "; //виведення повідомлення
+    while (!(cin >> accuracy))//якщо введення не є числом
+    {
+        cout << "Error!" << endl; //виведення повідомлення про помилку
+        cin.clear();//очищення потоку введення
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');//ігнорування залишків
+        cout << "Please try again: "; //виведення повідомлення про повторну спробу
+    }
+    cout << "================================================ " << endl;
+    cout << "   x        y      standard value        error" << endl;
+    cout << "================================================ " << endl;
+}
+//========== обчислення арксинуса за формулою ряда Тейлора ==========
+double arcsin(double a)
+{
+	//arcsin x = x + x^3/6 + 3x^5/40 + 15x^7/48 + ...
+	//параметр а - архумент функції arcsin x
+	double sum = 0; //сума членів ряду
+	double member = a; //поточний елемент ряду
+	double numerator = a; //значення чисельника
+	double denominator = 1; //значення знаменника
+	int i = 1; //знаменник елемента ряда
+	while (fabs(member) > accuracy) //поки поточний елемент за модулем перевищує точність розрахунку
+	{
+		sum += member; //накопичення суми членів ряду
+		numerator *= a * a; //чисельник 
+		denominator *= (2 * i) * (2 * i + 1); //знаменник
+		member = numerator / denominator; //поточний елемент
+		i++;//перехід до нового елемента ряду
+	}
+	return sum; //повернення значення арксинуса з функції
+}
+//========== виведення результатів у таблицю ==========
+void outputResult()
+{
+	if (flag) //якщо функцію визначено, то вивести її значення
+	{
+		if (x < -0.4 || x > 0) //перевірка значень аргумента з областю визначення арксинуса 
+			cout << setw(5) << x << setw(15) << "    Function not defined" << endl; //виведення результату
+		else //якщо функція відповідає області, виведення даної таблиці
+			cout << setw(5) << x << setw(10) << y << setw(15) << sf << setw(15) << error << endl;
+	}
+}
+// Розрахунок функції за рядом Тейлора, за стандартною функцією та похибки розрахунку 
+void solution()
+{
+	for (x = xs; x <= xf; x += xst) //цикл перебору значень аргументів функції
+	{
+		flag = true; //ознака невизначеності функції
+		if (-2 <= x && x < 0) //перевірка умов вибору розрахункової формули
+		{
+			y = arcsin(x / 2) / arcsin(2 * x); //визначення арксинуса за формулою Тейлора
+			sf = asin(x / 2) / asin(2 * x); //визначення арксинуса за стандартною функцією
+			error = fabs(sf - y); //розбіжності між точним і наближеним значенням функції
+		}
+		else if (0 <= x && x <= 2)
+		{
+			y = arcsin(x + 5) + arcsin(x * x);
+			sf = asin(x + 5) + asin(x * x);
+			error = fabs(sf - y);
+		}
+		else
+		{
+			flag = false; //функцію не визначено
+			cout << setw(5) << x << setw(15) << "    Function not defined" << endl; //виведення результату
+		}
+		outputResult();
+	}
+}
+//========== основна функція ==========
+int main()
+{
+	identification(); //ідентифікація автора та умови задачі
+	input(); //введення вхідних даних
+	solution(); //розрахунок функції для таблмці
+	outputResult(); //виведення результатів у таблицю
+	system("pause");
+} //кінець
+Завдання 2
+//Обчислення нескінченного ланцюгового дробу числа pi
+//   4
+//--------
+// 1 + 1^2
+// ---------
+//  3 + 2^2
+//  ----------
+//    5 + 3^2
+//      ....
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <cmath> //підключення бібліотеки для математичних розрахунків
+using namespace std;
+float accuracy, //точність розрахунку
+lastPi, //кінцеве значення числа pi
+approxPi; //приблизне значення
+int i, j; //змінні
+//========== ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab4 var4" << endl;
+	cout << "Calculation of an infinite continued fraction:" << endl <<
+		"   4 " << endl <<
+		"--------" << endl <<
+		"1 + 1^2" << endl <<
+		" --------" << endl <<
+		" 3 + 2^2" << endl <<
+		"  ----------" << endl <<
+		"   5 + 3^2 " << endl <<
+		"      ....." << endl;
+}
+//========== введення вхідних змінних ==========
+void input()
+{
+	cout << "Enter the accuracy of the calculations:" << endl;
+	while (!(cin >> accuracy)) //якщо введене некоректне значення
+	{
+		cout << "Errоr! Non integer value entered!" << endl; //повідомлення про помилку
+		cout << "Try again: " << endl; //прохання заміни
+		cin.clear();  //очищення стану потоку від помилки
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');///ігнорування залишків некоректного вводу
+	}
+	while (accuracy > 1)
+	{
+		cout << "Invalid value. Try again: " << endl;
+		cin >> accuracy;
+	}
+}
+//========== обчислення значення числа pi ==========
+float calculations(int i, int j)
+{
+	float fraction;
+	fraction = i + (j * j) / (i + 2);
+	while (i > 1) //поки значення і буде більше за одиницю
+	{
+		i -= 2; //зменшення на 2
+		j -- ; //зменшення на 1
+		fraction = i + ((j * j) / fraction); //обрахування значення елемента
+	}
+	return fraction; //повернення значення елемента з функції
+}
+//обчислення елемента з урахуванням точності
+void solution()
+{
+	i = 1;
+	j = 1;
+	lastPi = 1;
+	approxPi = 0;
+	while (fabs(lastPi - approxPi) > accuracy) //поки різниця кінцевого та приблизного значення числа pi за модулем більше за точність
+	{
+		lastPi = approxPi; //дані значення стають рівними
+		approxPi = calculations(i, j); //обчислення приблизного значення через функцію
+		i += 2; 
+		j++;
+	}
+	approxPi = 4 / approxPi; 
+}
+//========== основна функція ==========
+int main()
+{
+	identification(); //виклик функції ідентифікації
+	input(); //виклик функції введення
+	solution(); //виклик функції обчислення
+	cout << "Pi value: " << approxPi << endl; //виведення значення
+	system("pause");
+} //кінець

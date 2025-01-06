@@ -1,0 +1,189 @@
+   Завдання 1
+//Обчислити значення рекурсивної функції, заданої рекурентним співвідношенням, використовуючи рекурсивний та ітераційний процеси
+//        { X,            if N = 1
+// X^N =  {(X^N/2)^2,     if N - even
+//        {(X^(N-1)/2)^2, if N - odd
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <cmath> //підключення бібліотеки для математичних розрахунків
+#include <limits> // для використання numeric_limits
+using namespace std;
+int X, N; //введені значення Х та N
+int depth, iteration; //глибина рекурсії та кількість ітерацій
+int r_final, i_final; //фінальні значення Х, обчислені через рекрсію та ітерації
+//========== ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab5 var4" << endl;
+	cout << "Calculation the value of a recursive function:" << endl <<
+		"     | X,            if N = 1 " << endl <<
+		" y = |(X^N/2)^2,     if N - even " << endl <<
+		"     |(X^(N-1)/2)^2, if N - odd " << endl;
+	cout <<"Implement recursive and iterative options for calculating the function with the entered values, using recursion and the loop operator." << endl;
+	cout <<"Compare the efficiency of recursive and iterative implementations by determining the depth of recursion and the number of cycle iterations." << endl;
+}
+//========== введення вхідних змінних ==========
+void input()
+{
+    cout << "Enter the value of X:" << endl; //виведення повідомлення
+    bool validInputX = false; //булева змінна для перевірки введення
+    while (!validInputX) //доки введення некоректне
+    {
+        cin >> X; //внесення змінної
+        if (cin.fail() || X < 0 || cin.peek() != '\n') //якщо введення не є числом, менше нуля
+        {
+
+            cout << "Error! Invalid input." << endl; //виведення повідомлення
+            cin.clear(); //очищення буферу
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+            cout << "Please try again: " << endl; //виведення повідомлення
+        }
+        else //інакше
+        {
+            validInputX = true; //зміна булевої змінної на правду
+        }
+    }
+    cout << "Enter the value of N:" << endl; //виведення повідомлення
+    bool validInputN = false;
+    while (!validInputN) //доки введення некоректне
+    {
+        cin >> N; //внесення змінної
+        if (cin.fail() || N < 0 || cin.peek() != '\n') //якщо введення не є числом, менше нуля
+        {
+            cout << "Error! Invalid input." << endl; //виведення повідомлення
+            cin.clear(); //очищення буферу
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+            cout << "Please try again: " << endl; //виведення повідомлення
+        }
+        else //інакше
+        {
+            validInputN = true; //зміна булевої змінної на правду
+        }
+    }
+}
+//========== обчислення за допомогою рекурсії ===========
+int X_power(int X, int N) //обчислення Х шляхом рекурсії
+{
+    depth++; //збільшення глибини
+    if (N == 0) //якщо степінь = 0
+    {
+        return 1; //значення 1
+    }
+    else if (N == 1) //якщо степінь = 1
+    {
+        return X; //повернення значення Х
+    }
+    else if (N % 2 == 0) //якщо степінь парний
+    {
+        int r_result = X_power(X, N / 2); //обчислення за умовою
+        return r_result * r_result; //повернення добутку результатів
+    }
+    else if (N % 2 != 0) //якщо степінь непарний
+    {
+        int result = X_power(X, (N - 1) / 2); //обчислення за умовою
+        return result * result * X; //повернення добутку результатів і Х
+    }
+        
+}
+//=========== обчислення за допомогою ітерацій ===========
+int X_iteration(int X, int N) //розрахунок через ітерації
+{
+    int i_result = 1; //результат 1
+    while (N > 0) //доки степінь більший за нуль
+    {
+        if (N % 2 != 0) //якщо степінь непарний
+        {
+            i_result *= X; //добуток результата на Х
+            iteration++;//збільшення кількості ітерацій
+        }
+        X *= X; //збільшення у Х
+        N /= 2; //зменшення степеня у 2
+        iteration++; //збільшення ітерацій
+    }
+    return i_result; //повернення результату
+}
+//========== обчислення фінального результату ==========
+void solution() //функція обчислення фінального результату
+{
+     depth = 0; 
+     iteration = 0;
+     r_final = X_power(X, N); //фінальне значення через рекурсію
+     i_final = X_iteration(X, N); //фінальне значення через ітерації
+}
+//========== виведення результатів ==========
+void output()
+{
+    cout << "Results of recursive calculation: " << r_final << endl;
+    cout << "Depth of recursion: " << depth << endl;
+    cout << "Results of iteration calculation: " << i_final << endl;
+    cout << "Number of iterations: " << iteration << endl;
+}
+//========== основна функція ==========
+int main()
+{
+	identification(); //ідентифікація автора та умови задачі
+	input(); //введення значень
+    solution(); //обчислення результатів
+    output(); //виведення
+    system("pause"); //пауза системи
+}//кінець
+
+Завдання 2
+//Обчислення суми цифр числа, введеного з клавіатури
+#include <iostream> //підключення бібліотеки вводу-виведення
+#include <cmath> //підключення бібліотеки для математичних розрахунків
+using namespace std;
+int number, sum; //введене число та сума обчислення
+//========== ідентифікація автора та умова задачі ==========
+void identification()
+{
+	cout << "Student Olha Yezerska, gr SE-12 lab5 var4" << endl;
+	cout << "Calculation of the sum of the digits of a number entered from the keyboard:" << endl ;
+}
+//========== введення вхідних змінних ==========
+void input()
+{
+    cout << "Enter the number:" << endl; //повідомлення про введення цифри
+    bool validInput = false; //булева змінна для перевірки введення
+    while (!validInput) //доки введення некоректне
+    {
+        cin >> number; //внесення змінної
+        if (cin.fail() || number < 0 || cin.peek() != '\n') //якщо введення не є числом, менше нуля
+        {
+
+            cout << "Error! Invalid input." << endl; //виведення повідомлення
+            cin.clear(); //очищення буферу
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); //ігнорування залишків
+            cout << "Please try again: " << endl; //виведення повідомлення
+        }
+        else //інакше
+        {
+            validInput = true; //зміна булевої змінної на правду
+        }
+    }
+}
+//========== обчислення суми за допомогою рекурсії ==========
+int calculation(int number)
+{
+    if (number < 10) //якщо введене число менше 10
+    {
+        return number; //повернення його значення
+    }
+    else //якщо число більше 10
+    {
+        return number % 10 + calculation(number / 10); //повернення суми, обчисленої через рекурсію
+    }
+}
+//========== виведення результату ==========
+void output()
+{
+    sum = calculation(number); //призначення суми обчислення
+    cout << "Result: " << sum << endl; //вивід результата
+}
+//========== основна функція ==========
+int main()
+{
+    identification(); //ідентифікація
+    input(); //введення
+    output(); //виведення
+    system("pause"); //пауза системи
+}//кінець

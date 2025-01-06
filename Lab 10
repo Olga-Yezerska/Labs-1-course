@@ -1,0 +1,391 @@
+/Створити масив структур. Кожна структура складається з таких елементів: факультет, курс, група, прізвища студентів, екзаменаційні оцінки. 
+Реалізувати запити, визначивши: 
+1. факультет і курс, на якому середній бал не менше 3.5;
+2. прізвища студентів, що не мають трійок і двійок;
+3. факультет і групу, де найбільше відмінників.
+Результати запитів вивести у вигляді таблиць*/
+#include <iostream> //бібліотека введення-виведення
+#include <iomanip> //бібліотека маніпуляторів уведення-виведення
+#include <string.h> //бібліотека для роботи з рядками
+#include <cstdlib>  //бібліотека для генерації випадкових чисел
+#include <ctime>  //бібліотека для генерації випадкових чисел
+using namespace std;
+const int maxLength = 6; //максимальна довжина назви факультету
+const int surnameLength = 15; //максимальна довжина прізвища
+const int maxGrades = 4; //максимальна кількість оцінок
+const int numberStudents = 20; //максимальна кількість студентів
+const int numberFaculties = 5; //максимальна кількість факультетів
+int userChoice, structureChoice, number; //змінні для вибору меню, вибору створення структури та кількості студентів
+// =========== структура студентів ==========
+struct student 
+{
+    char faculty[maxLength]; //факультет
+    int course; //курс
+    int group; //група
+    char surname[surnameLength]; //прізвище
+    int grades[maxGrades]; //оцінки
+};
+// ========== ідентифікація автора та умови ==========
+void identification()
+{
+    cout << "Student Olha Yezerska, gr SE-12 lab8 var4" << endl;
+    cout << "Create an array of structures. Each structure consists of the following elements: faculty, course, group, students' names, exam grades." << endl;
+    cout << "Implement queries by defining :" << endl;
+    cout << "1. faculty and course in which the average score is at least 3.5;" << endl;
+    cout << "2. surnames of students that do not have threes and twos;" << endl;
+    cout << "3. faculty and group with the most excellent students." << endl;
+    cout << "Display the results of queries in the form of tables" << endl;
+}
+// ========== перевірка введеного числа ===========
+int check(int minValue, int maxValue)
+{
+    char input[100]; //для зчитування введення
+    int value; //змінна для введення
+    bool validInput = false; //булева змінна брехня
+    while (!validInput) //доки цикл справджується
+    {
+        cin.getline(input, 100); //зчитування рядка введення
+        if (strlen(input) == 0) //якщо рядок пустий
+        {
+            cout << "Input cannot be empty. Try again: "; //виведення повідомлення
+            continue; //продовження
+        }
+        bool isValidNumber = true; //булева змінна правда
+        for (int i = 0; input[i] != '\0'; i++) //доки коефіцієнт є нулем, не є новим рядком, збільшується
+        {
+            if ((i == 0 && input[i] == '-') || isdigit(static_cast<unsigned char>(input[i]))) //якщо число від'ємне або не є числом
+            {
+                continue; //продовження
+            }
+            isValidNumber = false; //булева змінна брехня
+            break; //вихід з циклу
+        }
+        if (isValidNumber) //якщо булева змінна правда
+        {
+            value = atoi(input); //перетворення введення
+            if (value >= minValue && value <= maxValue) //якщо введення менше за мінімальне, більше за максимальне
+            {
+                break; //вихід з циклу
+            }
+        }
+        cout << "Invalid input. Try again: "; //виведення повідомлення
+    }
+    return value; //повернення валідного значення
+}
+// ========== перемішення прізвищ ==========
+void shuffleSurnames(char surnames[][surnameLength], int count)
+{
+    for (int i = count - 1; i > 0; i--) //доки коефіцієнт дорівнбж за рахунок-1, менший за нуль і зменшується
+    {
+        int j = rand() % (i + 1); //рандомна генерація
+        char temp[surnameLength]; //тимчасовий масив
+        strcpy_s(temp, surnames[i]); //копіювання прізвища з індексу i до тимчасового масиву
+        strcpy_s(surnames[i], surnames[j]); //копіювання прізвища з індексу j в індекс i
+        strcpy_s(surnames[j], temp); //копіювання прізвища з тимчасового масиву назад у індекс j
+    }
+}
+// ========== генерування студентів ==========
+void generateRandomData(student students[])
+{
+    cout << "Enter the number of your students: "; //виведення повідомлення
+    number = check(1, 20); //перевірка через функцію
+    const char* faculties[] = { "FG", "FCSC", "FRECS", "FoP", "FP" }; //масив факультетів
+    char surnames[numberStudents][surnameLength] = { "Chernenko", "Gavrilenko", "Podorozhnyi", "Mayboroda", "Tymchuck", "Moskalenko", "Bondar", "Kovbel", "Kapnist", "Sanitar", "Hrestenko",
+    "Yaremko", "Bondarchyk", "Petrenko","Stahno","Semenko", "Hrystych", "Levitas","Sokyrko", "Trysh"}; //масив прізвищ
+    srand(time(0)); //генератор випадкових чисел
+    shuffleSurnames(surnames, number); //перемішення прізвищ
+    for (int i = 0; i < number; i++) //доки коефіцієнт дорівнює нудю, менше кількості студентів і збільшується
+    {
+        int facultyIndex = rand() % numberFaculties; //випадковий факультет
+        int course = rand() % 4 + 1; //випадковий курс
+        int group = rand() % 3 + 1; //випадкова група
+        strcpy_s(students[i].faculty, faculties[facultyIndex]); //присвоєння факультету
+        students[i].course = course; //присвоєння курсу
+        students[i].group = group; //присвоєння групи
+        strcpy_s(students[i].surname, surnames[i]); //присвоєння прізвища
+        for (int j = 0; j < maxGrades; j++) //доки коефіцієнт дорівнює нулю, менше максимальної кількості оцінок і збільшується
+        {
+            students[i].grades[j] = rand() % 5 + 1; //випадкова оцінка від 1-5
+        }
+    }
+}
+// ========== перевірка введення ==========
+void checkInput(const char* text, bool& validInput)
+{
+    validInput = true; //булева змінна правда
+    if (text[0] == '\0') //якщо перший символ рядка є порожнім рядком
+    {
+        cout << "Error: The line cannot be empty." << endl; //виведення повідомлення
+        validInput = false; //булева змінна брехня
+        return; //завершення функції
+    }
+    for (int i = 0; text[i] != '\0'; ++i) //доки коефіцієнт є нулем, символ не новий рядок, коефіцієнт збільшується
+    {
+        if ((text[i] < 'a' || text[i] > 'z') && (text[i] < 'A' || text[i] > 'Z')) //якщо символ не латинський
+        {
+            cout << "Error: The line must contain only Latin letters." << endl; //виведення повідомлення
+            validInput = false; //булева змінна брехня
+            break; //завершення циклу
+        }
+    }
+}
+// ========== внесення студентів ==========
+void inputStudents(student students[])
+{
+    char faculty[maxLength]; //масив факультету
+    char surname[surnameLength]; //масив прізвища
+    int course, group; //змінні для курсу і групи
+    int grades[maxGrades]; //масив оцінок
+    cout << "Enter the number of your students: "; //виведення повідомлення
+    number = check(1, 20); //перевірка через функцію
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менший за кількість студентів і збільшується
+    {
+        cout << "Student #" << i + 1 << ":" << endl; //виведення повідомлення
+        bool validInput = false; // булева змінна для перевірки введення
+        do //початок циклу
+        {
+            cout << "Faculty: "; // виведення повідомлення
+            cin.getline(faculty, maxLength); // введення значення
+            checkInput(faculty, validInput); // перевірка введення
+            if (!validInput) //якщо ввеження некоректне
+            {
+                cout << "Please re-enter the student's faculty name." << endl; // повідомлення про помилку
+            }
+        } while (!validInput); //доки введення не буде коректним
+        cout << "Course: "; //виведення повідомлення
+        course = check(1, 4); //внесення і перевірка значення
+        cout << "Group: "; //виведення повідомлення
+        group = check(1, 4); //внесення і перевірка значень
+        validInput = false; // скидання булевої змінної
+        do //початок циклу
+        {
+            cout << "Surname: "; // виведення повідомлення
+            cin.getline(surname, surnameLength); // введення значення
+            checkInput(surname, validInput); // перевірка введення
+            if (!validInput) //якщо введення некоректне
+            {
+                cout << "Please re-enter the student's surname." << endl; // повідомлення про помилку
+            }
+        } while (!validInput); //доки введення не буде коректним
+        cout << "Grades: "; //виведення повідомлення
+        for (int j = 0; j < maxGrades; j++) //доки коефіцієнт є нулем, менше максимальної кількості оцінок і збільшується
+        {
+            grades[j] = check(1, 5); //внесення і перевірка введення
+        }
+
+        strcpy_s(students[i].faculty, maxLength, faculty); //копіювання факультету
+        strcpy_s(students[i].surname, surnameLength, surname); //копіювання прізвища
+        students[i].course = course; //збереження курсу
+        students[i].group = group; //збереження групи
+        for (int j = 0; j < maxGrades; j++) //доки коефіцієнт є нулем, менше максимальної кількості оцінок і збільшується
+        {
+            students[i].grades[j] = grades[j]; //збереження оцінок
+        }
+    }
+}
+// ========== виведення таблиці ==========
+void printStudentTable(student students[])
+{
+    cout << left << setw(15) << "Faculty"<< setw(10) << "Course"<< setw(10) << "Group"<< setw(20) << "Surname"<< "Grades" << endl; //виведення повідомлення таблиці
+    cout << "-----------------------------------------------------------------" << endl; //виведення повідомлення
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менше кількості студентів і збільшується
+    {
+        cout << left << setw(15) << students[i].faculty<< setw(10) << students[i].course<< setw(10) << students[i].group<< setw(20) << students[i].surname<< "[";  //виведення повідомлення таблиці
+        for (int j = 0; j < maxGrades; j++) //доки коефіцієнт є нулем, менше максимальної кількості оцінок і збільшується
+        {
+            if (j == (maxGrades - 1)) //ящо остання оцінка
+            {
+                cout << students[i].grades[j] << "]" << endl; //виведення оцінки та символу
+            }
+            else //інакше
+            {
+                cout << students[i].grades[j] << " "; //виведення оцінки та пробілу
+            }
+        }
+    }
+}
+// ========== обчислення середнього значення ==========
+float calculateAverage(int grades[], int maxGrades)
+{
+    int sum = 0; //ініціалізація суми
+    for (int i = 0; i < maxGrades; i++)  //доки коефіцієнт є нулем, менше максимальної кількості оцінок і збільшується
+    {
+        sum += grades[i]; //додавання оцінки до суми
+    }
+    return (float)sum / maxGrades; //повернення середнього значення
+}
+// ========== виведення пункту 3 ==========
+void averageGrade(student students[])  
+{
+    cout << left << setw(15) << "Faculty" << setw(10) << "Course" << endl;  //виведення повідомлення таблиці
+    cout << "---------------------------------" << endl;  //виведення повідомлення
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менше кількості студентів і збільшується
+    {
+        float avg = calculateAverage(students[i].grades, maxGrades); //розрахунок середнього значення через функцію
+        if (avg >= 3.5) //якщо значення більше/дорівнює 3,5
+        { 
+            cout << left << setw(15) << students[i].faculty<< setw(10) << students[i].course << endl; //виведення факультету та курсу студента
+        }
+    }
+}
+// ========== перевірка на 2 і 3
+bool hasNoBadGrades(const int* grades, int maxGrades) 
+{
+    for (int i = 0; i < maxGrades; i++) //доки коефіцієнт є нулем, менше кількості студентів і збільшується
+    {
+        if (grades[i] == 2 || (grades[i] == 3)) //якщо оцінка 2 чи 3
+        {
+            return false; //повернення брехні
+        }
+    }
+    return true; //повернення правди
+}
+// ========== виведення пункту 4 ==========
+void excellentStudents(student students[])
+{
+    bool found = false; //ініціалізація булевої змінної брехнею
+    cout << "Surname" << endl; //виведення повідомлення
+    cout << "---------------------------------" << endl;  //виведення повідомлення
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менше кількості студентів і збільшується
+    {
+        if (hasNoBadGrades(students[i].grades, maxGrades)) //якщо немає 2 і 3 (перевірка через функцію)
+        {
+            cout << students[i].surname << endl; //виведення прізвища цього студента
+            found = true; //булева змінна правда
+        }
+    }
+    if (!found) //якщо булева змінна брехня
+    {
+        cout << "There are no such students." << endl;  //виведення повідомлення
+    }
+}
+// ========== перевірка на відмінника ==========
+bool hasAllExcellents(const int* grades)
+{
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менше за кількість студентів і збільшується
+    {
+        if (grades[i] != 5) //якщо оцінка не 5
+        {
+            return false; //повернення брехні
+        }
+    }
+    return true; //повернення правди
+}
+// ========== виведення пункту 5 ==========
+void queryMostExcellents(student students[])
+{
+    int maxExcellents = 0; //ініціалізація змінної студентів з відмінними оцінками
+    int bestGroup = -1; //ініціалізація номеру групи з найбільшою кількістю відмінників 
+    const char* bestFaculty = nullptr; //ініціалізація факультету
+    for (int i = 0; i < number; i++) //доки коефіцієнт є нулем, менше за кількість студентів і збільшується
+    {
+        if (hasAllExcellents(students[i].grades)) //якщо є всі 5
+        {
+            if (maxExcellents == 0 || students[i].group == bestGroup) //якщо це перший студент або з тієї ж групи
+            {
+                maxExcellents++; //збільшення лічильника
+                bestFaculty = students[i].faculty; //збереження факультету
+                bestGroup = students[i].group; //збереження групи
+            }
+        }
+    }
+    if (bestFaculty != nullptr) //якщо такий студент є
+    {
+        cout << left << setw(15) << "Faculty"<< setw(10) << "Group"<< setw(20) << "Number of Excellents" << endl;  //виведення повідомлення таблиці
+        cout << "---------------------------------------------------------------------------------------" << endl;  //виведення повідомлення
+        cout << left << setw(15) << bestFaculty<< setw(10) << bestGroup<< setw(20) << maxExcellents << endl; //виведення повідомлення
+    }
+    else //інакше
+    {
+        cout << "No students with all excellent grades found." << endl;  //виведення повідомлення
+    }
+}
+// ========== меню ==========
+void menu()
+{
+    //виведення меню
+    cout << "====================================== MENU ======================================" << endl;
+    cout << "1. Create the structure." << endl;
+    cout << "2. Output the structure." << endl;
+    cout << "3. Output the faculty and course in which the average score is at least 3.5;" << endl;
+    cout << "4. Output surnames of students that do not have threes and twos;" << endl;
+    cout << "5. Output faculty and group with the most excellent students." << endl; 
+    cout << "6. Exit." << endl;
+    cout << "==================================================================================" << endl;
+    student students[numberStudents]; //оголошення масиву студентів
+    bool generated = false; //ініціалізація булевої змінної брехні
+    do //доки цикл справджується
+    {
+        cout << "Chose the action: ";  //виведення повідомлення
+        userChoice = check(1, 6); //внесення і перевірка введення
+        switch (userChoice) //вибір варіанту
+        {
+        case 1: //якщо вибір 1
+            cout << "Chose how you want to create the structure: " << endl;  //виведення повідомлення
+            cout << "1. Input from the keyboard." << endl;  //виведення повідомлення
+            cout << "2. Random generation." << endl;  //виведення повідомлення
+            structureChoice = check(1, 2); //внесення і перевірка введення
+            if (structureChoice == 1) //якщо вибір 1
+            {
+                inputStudents(students); //виклик функції
+            }
+            else //якщо вибір 2
+            {
+                generateRandomData(students); //виклик функції
+            }
+            generated = true; //булева змінна правда
+            break; //вихід
+        case 2: //якщо вибір 2
+            if (generated) //якщо структура згенерована
+            {
+                printStudentTable(students); //виклик функції
+            }
+            else //інакше
+            {
+                cout << "The structure has not been generated yet." << endl;  //виведення повідомлення
+            }
+            break; //вихід
+        case 3: //якщо вибір 3
+            if (generated)  //якщо структура згенерована
+            {
+                averageGrade(students); //виклик функції
+            }
+            else //інакше
+            {
+                cout << "The structure has not been generated yet." << endl;  //виведення повідомлення
+            }
+            break; //вихід
+        case 4: //якщо вибір 4
+            if (generated)  //якщо структура згенерована
+            {
+                excellentStudents(students); //виклик функції
+            }
+            else //інакше
+            {
+                cout << "The structure has not been generated yet." << endl;  //виведення повідомлення
+            }
+            break; //вихід
+        case 5: //якщо вибір 5
+            if (generated)  //якщо структура згенерована
+            {
+                queryMostExcellents(students); //виклик функції
+            }
+            else //інакше
+            {
+                cout << "The structure has not been generated yet." << endl;  //виведення повідомлення
+            }
+            break; //вихід
+        case 6: //якщо вибір 6
+            cout << "Exiting the program. Goodbye!" << endl; //виведення повідомлення
+            return;  //завершення виконання функції choice і програми
+            break; //вихід
+        }
+    } while (userChoice != 6); //доки вибір 6
+}
+// ========== основна функція ==========
+int main()
+{
+    identification(); //виклик функції ідентифікації
+    menu(); //виклик функції меню
+    system("pause"); //пауза системи
+} //кінець
